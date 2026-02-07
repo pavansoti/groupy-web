@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Settings, MessageCircle, LogOut } from 'lucide-react'
-import Image from 'next/image'
+import { Settings, MessageCircle, LogOut, UserPlus, UserCheck } from 'lucide-react'
 import { User } from '@/app/(main)/profile/[[...id]]/page'
 import { useAuthStore } from '@/lib/stores/authStore'
 
@@ -15,6 +14,7 @@ interface ProfileHeaderProps {
 export function ProfileHeader({ user, isCurrentUser }: ProfileHeaderProps) {
   const [isEditingBio, setIsEditingBio] = useState(false)
   const [bio, setBio] = useState(user.bio || '')
+  const [isFollowing, setIsFollowing] = useState(false)
   const { logout } = useAuthStore()
 
   const joinDate = new Date(user.createdAt).toLocaleDateString('en-US', {
@@ -22,38 +22,46 @@ export function ProfileHeader({ user, isCurrentUser }: ProfileHeaderProps) {
     month: 'long',
   })
 
+  const postCount = 0 // TODO: Get from API
+
   const handleSaveBio = () => {
     // TODO: Call API to update bio
     setIsEditingBio(false)
   }
 
+  const handleFollowClick = () => {
+    // TODO: Call API to follow/unfollow
+    setIsFollowing(!isFollowing)
+  }
+
   return (
-    <div className="w-full bg-background">
-      {/* Profile Content */}
-      <div className="flex flex-col md:flex-row md:items-start md:gap-8 gap-6">
-        {/* Avatar Section */}
-        <div className="flex justify-center md:justify-start">
-          <div className="relative h-32 w-32 md:h-40 md:w-40 rounded-full overflow-hidden ring-2 ring-border">
-            <div className="h-full w-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-4xl md:text-5xl font-semibold text-primary">
+    <div className="w-full">
+      {/* Profile Header Container */}
+      <div className="flex flex-col gap-6 md:gap-8">
+        {/* Top Row: Avatar and Info */}
+        <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-start">
+          {/* Avatar Section */}
+          <div className="flex-shrink-0">
+            <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-full overflow-hidden ring-2 ring-border bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-3xl sm:text-4xl font-semibold text-primary">
               {user.username.charAt(0).toUpperCase()}
             </div>
           </div>
-        </div>
 
-        {/* Info Section */}
-        <div className="flex-1 space-y-4">
-          {/* Username and Actions */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-                {user.username}
-              </h1>
+          {/* Info Section */}
+          <div className="flex-1 w-full space-y-4">
+            {/* Username and Action Icons */}
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+                  {user.username}
+                </h1>
+              </div>
               {isCurrentUser && (
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-shrink-0">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9"
+                    className="h-9 w-9 text-muted-foreground hover:text-foreground"
                     title="Settings"
                   >
                     <Settings className="h-5 w-5" />
@@ -71,41 +79,51 @@ export function ProfileHeader({ user, isCurrentUser }: ProfileHeaderProps) {
               )}
             </div>
 
-            {/* Action Buttons */}
+            {/* Primary Action Button */}
             <div className="flex gap-2 flex-wrap">
               {isCurrentUser ? (
-                <Button className="flex-1 md:flex-none" variant="outline">
+                <Button variant="outline" size="sm">
                   Edit Profile
                 </Button>
               ) : (
                 <>
-                  <Button className="flex-1 md:flex-none">
-                    Follow
+                  <Button
+                    size="sm"
+                    variant={isFollowing ? 'outline' : 'default'}
+                    onClick={handleFollowClick}
+                    className="gap-2"
+                  >
+                    {isFollowing ? (
+                      <>
+                        <UserCheck className="h-4 w-4" />
+                        Following
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="h-4 w-4" />
+                        Follow
+                      </>
+                    )}
                   </Button>
-                  <Button variant="outline" size="icon" className="h-10 w-10">
-                    <MessageCircle className="h-5 w-5" />
+                  <Button variant="outline" size="icon" className="h-9 w-9">
+                    <MessageCircle className="h-4 w-4" />
                   </Button>
                 </>
               )}
             </div>
-          </div>
 
-          {/* Bio Section */}
-          <div className="space-y-2">
+            {/* Bio Section */}
             {isEditingBio && isCurrentUser ? (
               <div className="space-y-2">
                 <textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   placeholder="Add a bio..."
-                  className="w-full p-2 border border-input rounded-md bg-background text-foreground text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
                   rows={2}
                 />
                 <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={handleSaveBio}
-                  >
+                  <Button size="sm" onClick={handleSaveBio}>
                     Save
                   </Button>
                   <Button
@@ -119,31 +137,40 @@ export function ProfileHeader({ user, isCurrentUser }: ProfileHeaderProps) {
               </div>
             ) : (
               <p
-                className="text-foreground text-sm leading-relaxed cursor-pointer hover:opacity-80 transition-opacity"
+                className="text-foreground text-sm leading-relaxed cursor-pointer hover:opacity-75 transition-opacity"
                 onClick={() => isCurrentUser && setIsEditingBio(true)}
+                role={isCurrentUser ? 'button' : undefined}
+                tabIndex={isCurrentUser ? 0 : undefined}
               >
-                {bio || (isCurrentUser ? 'Click to add a bio' : 'No bio yet')}
+                {bio || (isCurrentUser ? 'Click to add a bio...' : 'No bio')}
               </p>
             )}
           </div>
+        </div>
 
-          {/* Stats Row */}
-          <div className="flex gap-8 pt-2">
-            <div className="text-center md:text-left">
-              <p className="text-xl md:text-2xl font-bold text-foreground">
-                {user.followers?.length || 0}
-              </p>
-              <p className="text-xs text-muted-foreground">Followers</p>
-            </div>
-            <div className="text-center md:text-left">
-              <p className="text-xl md:text-2xl font-bold text-foreground">
-                {user.following?.length || 0}
-              </p>
-              <p className="text-xs text-muted-foreground">Following</p>
-            </div>
-            <div className="text-center md:text-left">
-              <p className="text-xs text-muted-foreground">Joined {joinDate}</p>
-            </div>
+        {/* Stats Row */}
+        <div className="flex gap-6 sm:gap-8 border-t border-border pt-4">
+          <div className="flex flex-col items-start">
+            <p className="text-lg sm:text-xl font-bold text-foreground">
+              {postCount}
+            </p>
+            <p className="text-xs text-muted-foreground">Posts</p>
+          </div>
+          <div className="flex flex-col items-start">
+            <p className="text-lg sm:text-xl font-bold text-foreground">
+              {user.followers?.length || 0}
+            </p>
+            <p className="text-xs text-muted-foreground">Followers</p>
+          </div>
+          <div className="flex flex-col items-start">
+            <p className="text-lg sm:text-xl font-bold text-foreground">
+              {user.following?.length || 0}
+            </p>
+            <p className="text-xs text-muted-foreground">Following</p>
+          </div>
+          <div className="flex flex-col items-start">
+            <p className="text-xs text-muted-foreground">Joined</p>
+            <p className="text-xs text-foreground font-medium">{joinDate}</p>
           </div>
         </div>
       </div>
