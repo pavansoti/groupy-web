@@ -1,14 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ProfileCard } from '@/components/profile/ProfileCard'
+import { ProfileHeader } from '@/components/profile/ProfileHeader'
+import { ProfileTabs } from '@/components/profile/ProfileTabs'
 import { Card } from '@/components/ui/card'
-import { useAuthStore } from '@/lib/stores/userStore'
+import { useAuthStore } from '@/lib/stores/authStore'
 import { useParams } from 'next/navigation'
 import { apiService } from '@/lib/services/api'
 
 export interface User {
-  id: number
+  id: string | number
   username: string
   email: string
   bio: string | null
@@ -66,46 +67,53 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-2xl">
-        <Card className="p-6 text-center">
-          <p className="text-muted-foreground">Loading profile...</p>
-        </Card>
+      <div className="min-h-screen w-full">
+        <div className="max-w-4xl mx-auto p-4 sm:p-6">
+          <Card className="p-8 text-center">
+            <p className="text-muted-foreground">Loading profile...</p>
+          </Card>
+        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="p-6 max-w-2xl">
-        <Card className="p-6 text-center text-red-500">
-          {error}
-        </Card>
+      <div className="min-h-screen w-full">
+        <div className="max-w-4xl mx-auto p-4 sm:p-6">
+          <Card className="p-8 text-center">
+            <p className="text-destructive font-medium">{error}</p>
+          </Card>
+        </div>
       </div>
     )
   }
 
   if (!user) {
     return (
-      <div className="p-6 max-w-2xl">
-        <Card className="p-6 text-center">
-          <p className="text-muted-foreground">User not found</p>
-        </Card>
+      <div className="min-h-screen w-full">
+        <div className="max-w-4xl mx-auto p-4 sm:p-6">
+          <Card className="p-8 text-center">
+            <p className="text-muted-foreground">User not found</p>
+          </Card>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-8 p-4 sm:p-6 lg:p-8 max-w-2xl">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">
-          {isCurrentUser ? 'My Profile' : `${user.username}'s Profile`}
-        </h1>
-        <p className="text-muted-foreground">
-          {isCurrentUser ? 'View and manage your profile' : 'View user profile'}
-        </p>
+    <div className="min-h-screen w-full bg-background">
+      {/* Profile Header Section */}
+      <div className="border-b border-border">
+        <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+          <ProfileHeader user={user} isCurrentUser={isCurrentUser} />
+        </div>
       </div>
 
-      <ProfileCard user={user} isCurrentUser={isCurrentUser} isLoading={isLoading} />
+      {/* Tabs and Posts Section */}
+      <div className="max-w-4xl mx-auto">
+        <ProfileTabs user={user} isCurrentUser={isCurrentUser} />
+      </div>
     </div>
   )
 }
