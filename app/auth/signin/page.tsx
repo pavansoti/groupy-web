@@ -1,5 +1,4 @@
 import { SigninForm } from '@/components/auth/SigninForm'
-import AuthLayout from '../layout'
 
 export const metadata = {
   title: 'Sign In - InstaChat',
@@ -7,5 +6,5 @@ export const metadata = {
 }
 
 export default function SigninPage() {
-  return <AuthLayout><SigninForm /></AuthLayout>
+  return <SigninForm />
 }

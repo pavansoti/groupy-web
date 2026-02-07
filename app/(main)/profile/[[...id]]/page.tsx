@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { ProfileCard } from '@/components/profile/ProfileCard'
 import { Card } from '@/components/ui/card'
-import { useUserStore } from '@/lib/stores/userStore'
+import { useAuthStore } from '@/lib/stores/userStore'
 import { useParams } from 'next/navigation'
 import { apiService } from '@/lib/services/api'
 
@@ -18,21 +18,33 @@ export interface User {
   createdAt: string
 }
 
-export default function UserProfilePage() {
+export default function ProfilePage() {
   const params = useParams()
-  const userId = params.id as string
+  // params.id will be an array for optional catch-all, or undefined if not provided
+  const idArray = params.id as string[] | undefined
+  const userId = idArray ? idArray[0] : undefined
+
+  const { user: currentUser } = useAuthStore()
 
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Determine which user ID to fetch
+  const userIdToFetch = userId || currentUser?.id
+
   useEffect(() => {
+    if (!userIdToFetch) {
+      setError('User not found')
+      return
+    }
+
     const fetchUser = async () => {
       setIsLoading(true)
       setError(null)
 
       try {
-        const response = await apiService.getUser(userId)
+        const response = await apiService.getUser(userIdToFetch)
 
         // success key check
         if (response.data?.success) {
@@ -46,9 +58,11 @@ export default function UserProfilePage() {
         setIsLoading(false)
       }
     }
-    debugger
     fetchUser()
-  }, [userId])
+  }, [userIdToFetch])
+
+  // Check if this is the current user's profile
+  const isCurrentUser = currentUser && user && String(currentUser.id) === String(user.id)
 
   if (isLoading) {
     return (
@@ -83,11 +97,15 @@ export default function UserProfilePage() {
   return (
     <div className="space-y-8 p-4 sm:p-6 lg:p-8 max-w-2xl">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold">{user.username}</h1>
-        <p className="text-muted-foreground">View user profile</p>
+        <h1 className="text-3xl font-bold text-foreground">
+          {isCurrentUser ? 'My Profile' : `${user.username}'s Profile`}
+        </h1>
+        <p className="text-muted-foreground">
+          {isCurrentUser ? 'View and manage your profile' : 'View user profile'}
+        </p>
       </div>
 
-      <ProfileCard user={user} isLoading={isLoading} />
+      <ProfileCard user={user} isCurrentUser={isCurrentUser} isLoading={isLoading} />
     </div>
   )
 }
