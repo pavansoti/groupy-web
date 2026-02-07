@@ -1,0 +1,128 @@
+import { create } from 'zustand'
+
+export interface Comment {
+  id: string
+  authorId: string
+  authorUsername: string
+  authorProfilePicture?: string
+  content: string
+  createdAt: string
+}
+
+export interface Post {
+  id: string
+  authorId: string
+  authorUsername: string
+  authorProfilePicture?: string
+  image?: string
+  caption: string
+  likesCount: number
+  commentsCount: number
+  createdAt: string
+  isLiked: boolean
+  comments: Comment[]
+}
+
+interface FeedState {
+  posts: Post[]
+  isLoading: boolean
+  hasMore: boolean
+  offset: number
+
+  // Actions
+  setPosts: (posts: Post[]) => void
+  addPosts: (posts: Post[]) => void
+  updatePost: (postId: string, post: Partial<Post>) => void
+  toggleLike: (postId: string) => void
+  addComment: (postId: string, comment: Comment) => void
+  removeComment: (postId: string, commentId: string) => void
+  setIsLoading: (loading: boolean) => void
+  setHasMore: (hasMore: boolean) => void
+  incrementOffset: () => void
+  resetFeed: () => void
+}
+
+export const useFeedStore = create<FeedState>((set) => ({
+  posts: [],
+  isLoading: false,
+  hasMore: true,
+  offset: 0,
+
+  setPosts: (posts) =>
+    set({
+      posts,
+    }),
+
+  addPosts: (posts) =>
+    set((state) => ({
+      posts: [...state.posts, ...posts],
+    })),
+
+  updatePost: (postId, updatedPost) =>
+    set((state) => ({
+      posts: state.posts.map((post) =>
+        post.id === postId ? { ...post, ...updatedPost } : post
+      ),
+    })),
+
+  toggleLike: (postId) =>
+    set((state) => ({
+      posts: state.posts.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              isLiked: !post.isLiked,
+              likesCount: post.isLiked ? post.likesCount - 1 : post.likesCount + 1,
+            }
+          : post
+      ),
+    })),
+
+  addComment: (postId, comment) =>
+    set((state) => ({
+      posts: state.posts.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              comments: [...post.comments, comment],
+              commentsCount: post.commentsCount + 1,
+            }
+          : post
+      ),
+    })),
+
+  removeComment: (postId, commentId) =>
+    set((state) => ({
+      posts: state.posts.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              comments: post.comments.filter((c) => c.id !== commentId),
+              commentsCount: post.commentsCount - 1,
+            }
+          : post
+      ),
+    })),
+
+  setIsLoading: (isLoading) =>
+    set({
+      isLoading,
+    }),
+
+  setHasMore: (hasMore) =>
+    set({
+      hasMore,
+    }),
+
+  incrementOffset: () =>
+    set((state) => ({
+      offset: state.offset + 10,
+    })),
+
+  resetFeed: () =>
+    set({
+      posts: [],
+      offset: 0,
+      hasMore: true,
+    }),
+}))

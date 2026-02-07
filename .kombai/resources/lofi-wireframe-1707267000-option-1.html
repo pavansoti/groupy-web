@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InstaChat Redesign - Balanced Approach</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: #fff;
+      color: #333;
+      line-height: 1.5;
+    }
+    
+    .wireframe-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .wireframe-title {
+      text-align: center;
+      padding: 20px;
+      background: #f5f5f5;
+      border: 2px dashed #999;
+      margin-bottom: 30px;
+    }
+    
+    .wireframe-title h1 {
+      font-size: 24px;
+      color: #333;
+    }
+    
+    .wireframe-title p {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    /* Layout Grid */
+    .app-layout {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      grid-template-rows: 64px 1fr;
+      min-height: 100vh;
+      gap: 0;
+      border: 2px solid #333;
+    }
+    
+    /* Navbar */
+    .navbar {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      background: #f5f5f5;
+      border-bottom: 2px solid #333;
+    }
+    
+    .navbar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .logo-circle {
+      width: 40px;
+      height: 40px;
+      background: #ccc;
+      border-radius: 50%;
+      border: 2px solid #333;
+    }
+    
+    .navbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      background: #fff;
+      border: 2px solid #333;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    
+    .avatar {
+      width: 40px;
+      height: 40px;
+      background: #ccc;
+      border-radius: 50%;
+      border: 2px solid #333;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      background: #fafafa;
+      border-right: 2px solid #333;
+      padding: 20px 10px;
+      position: relative;
+    }
+    
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #fff;
+      border: 2px solid #333;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    
+    .nav-item.active {
+      background: #333;
+      color: #fff;
+    }
+    
+    .nav-icon {
+      width: 24px;
+      height: 24px;
+      background: #ccc;
+      border-radius: 4px;
+    }
+    
+    .nav-item.active .nav-icon {
+      background: #666;
+    }
+    
+    /* Main Content */
+    .main-content {
+      background: #fff;
+      padding: 24px;
+      overflow-y: auto;
+    }
+    
+    .content-wrapper {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    /* Create Post Card */
+    .create-post-card {
+      background: #fff;
+      border: 2px solid #333;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .textarea-placeholder {
+      width: 100%;
+      height: 80px;
+      background: #f5f5f5;
+      border: 2px dashed #999;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      margin-bottom: 16px;
+    }
+    
+    .card-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .action-icons {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .btn {
+      padding: 10px 24px;
+      background: #333;
+      color: #fff;
+      border: 2px solid #333;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    
+    .btn-outline {
+      background: #fff;
+      color: #333;
+    }
+    
+    /* Post Card */
+    .post-card {
+      background: #fff;
+      border: 2px solid #333;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    
+    .post-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .post-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .post-image {
+      width: 100%;
+      height: 300px;
+      background: linear-gradient(135deg, #e0e0e0 0%, #ccc 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .post-content {
+      padding: 16px;
+    }
+    
+    .post-actions {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .like-count {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    
+    .post-caption {
+      margin-bottom: 8px;
+    }
+    
+    .comments-link {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    /* Component Tags */
+    .component-tag {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-family: Arial, sans-serif;
+      font-weight: bold;
+      z-index: 10;
+    }
+    
+    .tag-reuse {
+      background: #4CAF50;
+      color: white;
+    }
+    
+    .tag-new {
+      background: #FF9800;
+      color: white;
+    }
+    
+    /* Auth Page Layout */
+    .auth-layout {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f5f5f5;
+      padding: 40px;
+    }
+    
+    .auth-container {
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    
+    .auth-header {
+      margin-bottom: 32px;
+    }
+    
+    .auth-header h1 {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    
+    .auth-header p {
+      color: #666;
+    }
+    
+    .auth-card {
+      background: #fff;
+      border: 2px solid #333;
+      border-radius: 12px;
+      padding: 32px;
+      position: relative;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    
+    .form-input {
+      width: 100%;
+      height: 44px;
+      background: #f5f5f5;
+      border: 2px solid #333;
+      border-radius: 8px;
+      padding: 0 12px;
+    }
+    
+    .auth-link {
+      margin-top: 20px;
+      color: #666;
+    }
+    
+    /* Mobile Nav */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-top: 2px solid #333;
+      padding: 8px;
+    }
+    
+    .mobile-nav-items {
+      display: flex;
+      justify-content: space-around;
+    }
+    
+    .mobile-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 16px;
+      background: #fff;
+      border: 2px solid transparent;
+      border-radius: 8px;
+    }
+    
+    .mobile-nav-item.active {
+      background: #333;
+      color: #fff;
+      border-color: #333;
+    }
+    
+    /* Section Headers */
+    .section-header {
+      background: #eee;
+      padding: 10px;
+      margin: 40px 0 20px;
+      border: 2px dashed #999;
+      text-align: center;
+    }
+    
+    /* Chat Layout */
+    .chat-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 20px;
+      height: calc(100vh - 200px);
+    }
+    
+    .conversations-list {
+      background: #fff;
+      border: 2px solid #333;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .conversations-header {
+      padding: 16px;
+      border-bottom: 1px solid #eee;
+      font-weight: bold;
+    }
+    
+    .conversation-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    
+    .conversation-item.active {
+      background: #f5f5f5;
+    }
+    
+    .online-indicator {
+      width: 10px;
+      height: 10px;
+      background: #4CAF50;
+      border-radius: 50%;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      border: 2px solid #fff;
+    }
+    
+    .chat-window {
+      background: #fff;
+      border: 2px solid #333;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    
+    .chat-header {
+      padding: 16px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .chat-messages {
+      flex: 1;
+      padding: 16px;
+      background: #fafafa;
+    }
+    
+    .message-bubble {
+      max-width: 70%;
+      padding: 12px 16px;
+      border-radius: 16px;
+      margin-bottom: 12px;
+    }
+    
+    .message-sent {
+      background: #333;
+      color: #fff;
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+    
+    .message-received {
+      background: #e5e5e5;
+      border-bottom-left-radius: 4px;
+    }
+    
+    .chat-input {
+      padding: 16px;
+      border-top: 1px solid #eee;
+      display: flex;
+      gap: 12px;
+    }
+    
+    .chat-input-field {
+      flex: 1;
+      height: 44px;
+      background: #f5f5f5;
+      border: 2px solid #333;
+      border-radius: 22px;
+      padding: 0 16px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .app-layout {
+        grid-template-columns: 1fr;
+      }
+      
+      .sidebar {
+        display: none;
+      }
+      
+      .mobile-nav {
+        display: block;
+      }
+      
+      .main-content {
+        padding-bottom: 80px;
+      }
+      
+      .chat-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wireframe-container">
+    <div class="wireframe-title">
+      <h1>InstaChat Redesign Wireframe - Balanced Approach</h1>
+      <p>This wireframe shows improved layout structure, proper component usage, and better visual hierarchy</p>
+    </div>
+    
+    <!-- MAIN APP LAYOUT -->
+    <div class="section-header">
+      <h2>Feed Page Layout (Desktop)</h2>
+    </div>
+    
+    <div class="app-layout">
+      <!-- Navbar -->
+      <!-- REUSABLE: Navbar from components/layout/Navbar.tsx -->
+      <nav class="navbar">
+        <span class="component-tag tag-reuse" title="components/layout/Navbar.tsx">[REUSE] Navbar</span>
+        <div class="navbar-logo">
+          <div class="logo-circle"></div>
+          <span style="font-weight: bold; font-size: 20px;">InstaChat</span>
+        </div>
+        <div class="navbar-actions">
+          <div class="icon-btn">☀️</div>
+          <div class="avatar"></div>
+        </div>
+      </nav>
+      
+      <!-- Sidebar -->
+      <!-- REUSABLE: Sidebar from components/layout/Sidebar.tsx -->
+      <aside class="sidebar">
+        <span class="component-tag tag-reuse" title="components/layout/Sidebar.tsx">[REUSE] Sidebar</span>
+        <nav class="sidebar-nav">
+          <div class="nav-item active">
+            <div class="nav-icon"></div>
+            <span>Feed</span>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon"></div>
+            <span>Likes</span>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon"></div>
+            <span>Search</span>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon"></div>
+            <span>Messages</span>
+          </div>
+          <div class="nav-item">
+            <div class="nav-icon"></div>
+            <span>Profile</span>
+          </div>
+        </nav>
+      </aside>
+      
+      <!-- Main Content -->
+      <main class="main-content">
+        <div class="content-wrapper">
+          <!-- Create Post Card -->
+          <!-- REUSABLE: Card from components/ui/card.tsx -->
+          <div class="create-post-card">
+            <span class="component-tag tag-reuse" title="components/feed/CreatePostForm.tsx">[REUSE] CreatePostForm</span>
+            <div class="card-header">
+              <div class="avatar"></div>
+              <strong>Create a Post</strong>
+            </div>
+            <!-- REUSABLE: Textarea from components/ui/textarea.tsx -->
+            <div class="textarea-placeholder">[Textarea] What's on your mind?</div>
+            <div class="card-actions">
+              <div class="action-icons">
+                <!-- NEW COMPONENT: StyledFileUpload -->
+                <div class="icon-btn" style="position: relative;">
+                  <span class="component-tag tag-new" title="components/ui/file-upload.tsx">[NEW] FileUpload</span>
+                  📷
+                </div>
+              </div>
+              <!-- REUSABLE: Button from components/ui/button.tsx -->
+              <button class="btn">Post</button>
+            </div>
+          </div>
+          
+          <!-- Post Card 1 -->
+          <!-- REUSABLE: PostCard from components/feed/PostCard.tsx -->
+          <article class="post-card">
+            <span class="component-tag tag-reuse" title="components/feed/PostCard.tsx">[REUSE] PostCard</span>
+            <div class="post-header">
+              <div class="post-user">
+                <!-- REUSABLE: Avatar from components/ui/avatar.tsx (to be added) -->
+                <div class="avatar" style="position: relative;">
+                  <span class="component-tag tag-new" title="components/ui/avatar.tsx">[NEW] Avatar</span>
+                </div>
+                <div>
+                  <div style="font-weight: bold;">John Doe</div>
+                  <div style="font-size: 12px; color: #666;">Feb 7, 2026</div>
+                </div>
+              </div>
+            </div>
+            <div class="post-image">[Image: 600x300]</div>
+            <div class="post-content">
+              <div class="post-actions">
+                <div class="icon-btn">♡</div>
+                <div class="icon-btn">💬</div>
+                <div class="icon-btn">↗️</div>
+              </div>
+              <div class="like-count">234 likes</div>
+              <div class="post-caption">
+                <strong>John Doe</strong> Just launched my new project! 🚀
+              </div>
+              <div class="comments-link">View 12 comments</div>
+            </div>
+          </article>
+          
+          <!-- Post Card 2 -->
+          <article class="post-card">
+            <span class="component-tag tag-reuse" title="components/feed/PostCard.tsx">[REUSE] PostCard</span>
+            <div class="post-header">
+              <div class="post-user">
+                <div class="avatar"></div>
+                <div>
+                  <div style="font-weight: bold;">Jane Smith</div>
+                  <div style="font-size: 12px; color: #666;">Feb 6, 2026</div>
+                </div>
+              </div>
+            </div>
+            <div class="post-content">
+              <div class="post-actions">
+                <div class="icon-btn">♡</div>
+                <div class="icon-btn">💬</div>
+                <div class="icon-btn">↗️</div>
+              </div>
+              <div class="like-count">456 likes</div>
+              <div class="post-caption">
+                <strong>Jane Smith</strong> Beautiful sunset today 🌅
+              </div>
+              <div class="comments-link">View 28 comments</div>
+            </div>
+          </article>
+          
+          <!-- Load More Button -->
+          <div style="text-align: center; padding: 20px;">
+            <button class="btn btn-outline">Load More</button>
+          </div>
+        </div>
+      </main>
+    </div>
+    
+    <!-- Mobile Navigation (shown at bottom on mobile) -->
+    <!-- REUSABLE: MobileNav from components/layout/MobileNav.tsx -->
+    <div class="mobile-nav" style="display: block; position: relative; margin-top: 20px;">
+      <span class="component-tag tag-reuse" title="components/layout/MobileNav.tsx">[REUSE] MobileNav</span>
+      <div class="mobile-nav-items">
+        <div class="mobile-nav-item active">🏠</div>
+        <div class="mobile-nav-item">♡</div>
+        <div class="mobile-nav-item">🔍</div>
+        <div class="mobile-nav-item">💬</div>
+        <div class="mobile-nav-item">👤</div>
+      </div>
+    </div>
+    
+    <!-- AUTH PAGE LAYOUT -->
+    <div class="section-header">
+      <h2>Auth Page Layout (Sign In / Sign Up)</h2>
+    </div>
+    
+    <div class="auth-layout" style="min-height: auto; padding: 40px; border: 2px solid #333;">
+      <div class="auth-container">
+        <div class="auth-header">
+          <div class="logo-circle" style="margin: 0 auto 16px;"></div>
+          <h1>InstaChat</h1>
+          <p>Real-time chat and social platform</p>
+        </div>
+        
+        <!-- NEW COMPONENT: AuthCard wrapper -->
+        <div class="auth-card">
+          <span class="component-tag tag-new" title="components/auth/AuthCard.tsx">[NEW] AuthCard</span>
+          
+          <div class="form-group">
+            <!-- REUSABLE: Label from components/ui/label.tsx -->
+            <label class="form-label">Email</label>
+            <!-- REUSABLE: Input from components/ui/input.tsx -->
+            <div class="form-input" style="display: flex; align-items: center; color: #999;">you@example.com</div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="form-input" style="display: flex; align-items: center; color: #999;">••••••••</div>
+          </div>
+          
+          <!-- REUSABLE: Button from components/ui/button.tsx -->
+          <button class="btn" style="width: 100%;">Sign In</button>
+          
+          <p class="auth-link">
+            Don't have an account? <span style="color: #333; font-weight: bold;">Sign up</span>
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CHAT PAGE LAYOUT -->
+    <div class="section-header">
+      <h2>Chat Page Layout</h2>
+    </div>
+    
+    <div style="border: 2px solid #333; padding: 20px; background: #f5f5f5;">
+      <div class="chat-layout" style="height: 400px;">
+        <!-- Conversations List -->
+        <!-- REUSABLE: Card from components/ui/card.tsx -->
+        <div class="conversations-list">
+          <span class="component-tag tag-reuse" title="components/chat/ConversationItem.tsx">[REUSE] ConversationItem</span>
+          <div class="conversations-header">Messages</div>
+          <div class="conversation-item active">
+            <div class="avatar" style="position: relative;">
+              <span class="online-indicator"></span>
+            </div>
+            <div style="flex: 1;">
+              <div style="font-weight: bold;">Alice</div>
+              <div style="font-size: 12px; color: #666;">Hey, how are you?</div>
+            </div>
+            <span style="background: #333; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 12px;">3</span>
+          </div>
+          <div class="conversation-item">
+            <div class="avatar"></div>
+            <div style="flex: 1;">
+              <div style="font-weight: bold;">Bob</div>
+              <div style="font-size: 12px; color: #666;">See you tomorrow!</div>
+            </div>
+          </div>
+          <div class="conversation-item">
+            <div class="avatar"></div>
+            <div style="flex: 1;">
+              <div style="font-weight: bold;">Charlie</div>
+              <div style="font-size: 12px; color: #666;">Thanks for sharing</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Chat Window -->
+        <!-- REUSABLE: ChatWindow from components/chat/ChatWindow.tsx -->
+        <div class="chat-window">
+          <span class="component-tag tag-reuse" title="components/chat/ChatWindow.tsx">[REUSE] ChatWindow</span>
+          <div class="chat-header">
+            <div class="avatar" style="position: relative;">
+              <span class="online-indicator"></span>
+            </div>
+            <div>
+              <div style="font-weight: bold;">Alice</div>
+              <div style="font-size: 12px; color: #4CAF50;">Online</div>
+            </div>
+          </div>
+          <div class="chat-messages">
+            <!-- REUSABLE: MessageBubble from components/chat/MessageBubble.tsx -->
+            <div class="message-bubble message-received">Hey there! 👋</div>
+            <div class="message-bubble message-sent">Hi Alice! How are you?</div>
+            <div class="message-bubble message-received">I'm great, thanks for asking!</div>
+          </div>
+          <div class="chat-input">
+            <!-- REUSABLE: MessageInput from components/chat/MessageInput.tsx -->
+            <div class="chat-input-field" style="display: flex; align-items: center; color: #999;">Type a message...</div>
+            <button class="btn">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- COMPONENT SUMMARY -->
+    <div class="section-header">
+      <h2>Component Summary</h2>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; border: 2px solid #333;">
+      <div>
+        <h3 style="color: #4CAF50; margin-bottom: 12px;">✅ Reusable Components</h3>
+        <ul style="list-style: none; padding: 0;">
+          <li style="padding: 8px; background: #e8f5e9; margin-bottom: 4px; border-radius: 4px;">• Navbar (components/layout/Navbar.tsx)</li>
+          <li style="padding: 8px; background: #e8f5e9; margin-bottom: 4px; border-radius: 4px;">• Sidebar (components/layout/Sidebar.tsx)</li>
+          <li style="padding: 8px; background: #e8f5e9; margin-bottom: 4px; border-radius: 4px;">• MobileNav (components/layout/MobileNav.tsx)</li>
+          <li style="padding: 8px; background: #e8f5e9; margin-bottom: 4px; border-radius: 4px;">• PostCard (components/feed/PostCard.tsx)</li>
+          <li style="padding: 8px; background: #e8f5e9; margin-bottom: 4px; border-radius: 4px;">• CreatePostForm (components/feed/CreatePostForm.tsx)</li>
+          <li style="padding: 8px; background: #e8f5e9; margin-bottom: 4px; border-radius: 4px;">• ChatWindow (components/chat/ChatWindow.tsx)</li>
+          <li style="padding: 8px; background: #e8f5e9; margin-bottom: 4px; border-radius: 4px;">• ConversationItem (components/chat/ConversationItem.tsx)</li>
+          <li style="padding: 8px; background: #e8f5e9; margin-bottom: 4px; border-radius: 4px;">• MessageBubble (components/chat/MessageBubble.tsx)</li>
+          <li style="padding: 8px; background: #e8f5e9; margin-bottom: 4px; border-radius: 4px;">• Card, Button, Input, Label, Badge, Textarea (shadcn UI)</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="color: #FF9800; margin-bottom: 12px;">🆕 New Components to Create</h3>
+        <ul style="list-style: none; padding: 0;">
+          <li style="padding: 8px; background: #fff3e0; margin-bottom: 4px; border-radius: 4px;">• Avatar (components/ui/avatar.tsx) - shadcn</li>
+          <li style="padding: 8px; background: #fff3e0; margin-bottom: 4px; border-radius: 4px;">• FileUpload (components/ui/file-upload.tsx) - styled file input</li>
+          <li style="padding: 8px; background: #fff3e0; margin-bottom: 4px; border-radius: 4px;">• AuthCard (components/auth/AuthCard.tsx) - wrapper for auth forms</li>
+          <li style="padding: 8px; background: #fff3e0; margin-bottom: 4px; border-radius: 4px;">• Skeleton (components/ui/skeleton.tsx) - loading states</li>
+        </ul>
+        
+        <h3 style="color: #333; margin: 20px 0 12px;">🔧 Key Fixes Needed</h3>
+        <ul style="list-style: none; padding: 0;">
+          <li style="padding: 8px; background: #f5f5f5; margin-bottom: 4px; border-radius: 4px;">• Add &lt;main&gt; landmark to layouts</li>
+          <li style="padding: 8px; background: #f5f5f5; margin-bottom: 4px; border-radius: 4px;">• Fix color contrast on links (4.5:1 ratio)</li>
+          <li style="padding: 8px; background: #f5f5f5; margin-bottom: 4px; border-radius: 4px;">• Center auth forms properly</li>
+          <li style="padding: 8px; background: #f5f5f5; margin-bottom: 4px; border-radius: 4px;">• Add Card wrapper to auth forms</li>
+          <li style="padding: 8px; background: #f5f5f5; margin-bottom: 4px; border-radius: 4px;">• Style file upload button</li>
+          <li style="padding: 8px; background: #f5f5f5; margin-bottom: 4px; border-radius: 4px;">• Remove default link underlines</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

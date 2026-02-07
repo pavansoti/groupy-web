@@ -1,0 +1,54 @@
+'use client'
+
+import { Conversation } from '@/lib/stores/chatStore'
+import { cn } from '@/lib/utils'
+import Link from 'next/link'
+import { Badge } from '@/components/ui/badge'
+
+interface ConversationItemProps {
+  conversation: Conversation
+  isActive?: boolean
+  onSelect?: () => void
+}
+
+export function ConversationItem({ conversation, isActive = false, onSelect }: ConversationItemProps) {
+  return (
+    <button
+      onClick={onSelect}
+      className={cn(
+        'w-full p-3 text-left rounded-lg transition-colors flex items-center justify-between',
+        isActive ? 'bg-primary/10 border border-primary' : 'hover:bg-muted'
+      )}
+    >
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="h-10 w-10 rounded-full bg-primary/50 flex-shrink-0 flex items-center justify-center text-sm font-semibold relative">
+          {conversation.participantProfilePicture ? (
+            <img
+              src={conversation.participantProfilePicture || "/placeholder.svg"}
+              alt={conversation.participantUsername}
+              className="h-10 w-10 rounded-full object-cover"
+            />
+          ) : (
+            conversation.participantUsername.charAt(0).toUpperCase()
+          )}
+          {conversation.isOnline && (
+            <div className="absolute bottom-0 right-0 h-2.5 w-2.5 bg-green-500 rounded-full border border-background"></div>
+          )}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-foreground truncate">
+            {conversation.participantUsername}
+          </p>
+          <p className="text-xs text-muted-foreground truncate">
+            {conversation.lastMessage || 'No messages yet'}
+          </p>
+        </div>
+      </div>
+
+      {conversation.unreadCount > 0 && (
+        <Badge className="ml-2 flex-shrink-0">{conversation.unreadCount}</Badge>
+      )}
+    </button>
+  )
+}
