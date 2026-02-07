@@ -1,7 +1,5 @@
-// import { FeedContent } from '@/components/feed/FeedContent'
+import { redirect } from 'next/navigation'
 
-import { SigninForm } from "@/components/auth/SigninForm";
-
-export default function Home() {
-  return <SigninForm />
+export default function HomePage() {
+  redirect('/auth/signin')
 }
