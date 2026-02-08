@@ -57,7 +57,7 @@ export function CreatePostForm({
     formData.append('caption', data.caption)
 
     if (file) {
-      formData.append('image', file)
+      formData.append('file', file)
     }
 
     await onSubmit(formData)
