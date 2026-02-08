@@ -33,6 +33,18 @@ export function FeedContent() {
 
   useEffect(() => {
     if (posts.length === 0) {
+      const fetchPosts = async () => {
+        try {
+          const response = await apiService.getFeed();
+          console.log('Fetched posts:', response.data.data)
+          // setPosts(response.data.data)
+          setPosts(MOCK_POSTS)
+        } catch (error) {
+          console.error('Error fetching posts:', error)
+        }
+      }
+      fetchPosts()
+    } else {
       setPosts(MOCK_POSTS)
     }
   }, [])

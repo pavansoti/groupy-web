@@ -76,12 +76,24 @@ class ApiService {
     return this.api.get(`/api/users/${userId}`)
   }
 
-  async updateProfile(userId: string, data: any) {
+  async updateProfile(userId: string | number, data: any) {
     return this.api.put(`/api/users/${userId}`, data)
   }
 
+  // Profile
+  async updateProfileImage(userId: string | number, file: File) {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    return this.api.put(`/api/users/${userId}/profile-pic`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+  }
+
   async searchUsers(query: string) {
-    return this.api.get('/api/users/search', { params: { q: query } })
+    return this.api.get('/api/users/search', { params: { query: query } })
   }
 
   // Follow endpoints
@@ -103,11 +115,12 @@ class ApiService {
 
   // Feed endpoints
   async getFeed(limit: number = 10, offset: number = 0) {
-    return this.api.get('/feed', { params: { limit, offset } })
+    return this.api.get('/api/posts/feed', { params: { limit, offset } })
   }
 
+  //---------
   async createPost(data: FormData) {
-    return this.api.post('/posts', data, {
+    return this.api.post('/api/posts', data, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
   }
@@ -117,12 +130,12 @@ class ApiService {
   }
 
   // Like endpoints
-  async likePost(postId: string) {
-    return this.api.post(`/posts/${postId}/like`)
+  async likePost(postId: string | number) {
+    return this.api.post(`/api/posts/${postId}/like`)
   }
 
-  async unlikePost(postId: string) {
-    return this.api.delete(`/posts/${postId}/like`)
+  async unlikePost(postId: string | number) {
+    return this.api.delete(`/api/posts/${postId}/like`)
   }
 
   // Comment endpoints

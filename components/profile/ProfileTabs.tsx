@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { User } from '@/app/(main)/profile/[[...id]]/page'
 import { Heart, Bookmark, Image as ImageIcon } from 'lucide-react'
+import { Post } from '@/lib/stores/feedStore'
+import { PostItem } from './PostItem'
 
 interface ProfileTabsProps {
   user: User
@@ -18,8 +20,9 @@ interface Tab {
   show: boolean
 }
 
-export function ProfileTabs({ user, isCurrentUser }: ProfileTabsProps) {
+export function ProfileTabs({ user: initialUser, isCurrentUser }: ProfileTabsProps) {
   const [activeTab, setActiveTab] = useState<TabId>('posts')
+  const [user, setUser] = useState<User>(initialUser)
 
   const tabs: Tab[] = [
     {
@@ -70,7 +73,19 @@ export function ProfileTabs({ user, isCurrentUser }: ProfileTabsProps) {
 
       {/* Tab Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        {activeTab === 'posts' && <PostsGrid />}
+      {activeTab === 'posts' && (
+          <PostsGrid
+            posts={user.posts}
+            isCurrentUserProfile={isCurrentUser}
+            setPosts={(updater) =>
+              setUser((prev) =>
+                prev ? { ...prev, posts: typeof updater === 'function'
+                  ? updater(prev.posts)
+                  : updater } : prev
+              )
+            }
+          />
+        )}
         {activeTab === 'liked' && isCurrentUser && <LikedPostsGrid />}
         {activeTab === 'saved' && isCurrentUser && <SavedPostsGrid />}
       </div>
@@ -78,16 +93,33 @@ export function ProfileTabs({ user, isCurrentUser }: ProfileTabsProps) {
   )
 }
 
-function PostsGrid() {
-  const hasNoPosts = true // TODO: Replace with actual data check
-
-  if (hasNoPosts) {
+function PostsGrid({
+  posts,
+  isCurrentUserProfile,
+  setPosts,
+}: {
+  posts: Post[]
+  isCurrentUserProfile: boolean
+  setPosts: React.Dispatch<React.SetStateAction<Post[]>>
+}) {
+  if (!posts || posts.length === 0) {
     return <EmptyState message="No posts yet" />
+  }
+
+  const handleDeleteFromUI = (postId: number) => {
+    setPosts((prev) => prev.filter((p) => p.id !== postId))
   }
 
   return (
     <div className="grid grid-cols-3 gap-1 sm:gap-2 py-6">
-      {/* TODO: Fetch and display user posts */}
+      {posts.map((post) => (
+        <PostItem
+          key={post.id}
+          post={post}
+          isCurrentUserProfile={isCurrentUserProfile}
+          onDelete={handleDeleteFromUI}
+        />
+      ))}
     </div>
   )
 }

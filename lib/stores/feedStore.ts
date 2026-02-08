@@ -10,13 +10,14 @@ export interface Comment {
 }
 
 export interface Post {
-  id: string
+  id: number | string
   authorId: string
   authorUsername: string
   authorProfilePicture?: string
-  image?: string
+  imageUrl?: string
   caption: string
-  likesCount: number
+  likes?: any []
+  likesCount?: number
   commentsCount: number
   createdAt: string
   isLiked: boolean
