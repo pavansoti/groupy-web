@@ -40,9 +40,7 @@ export default function ProfilePage() {
 
   // Determine which user ID to fetch
   const userIdToFetch = userId || currentUser?.id
-console.log('userIdToFetch', userIdToFetch)
-  console.log('currentUser', currentUser) 
-  console.log('user', user)
+
   useEffect(() => {
     if (!userIdToFetch) {
       setError('User not found')
@@ -73,6 +71,14 @@ console.log('userIdToFetch', userIdToFetch)
 
   const handleUserUpdate = (updatedUser: User) => {
     setUser(updatedUser)
+  }
+
+  const handlePostDeleted = () => {
+    setUser((prev) =>
+      prev
+        ? { ...prev, postCount: prev.postCount - 1 }
+        : prev
+    )
   }
 
   // Check if this is the current user's profile
@@ -125,7 +131,7 @@ console.log('userIdToFetch', userIdToFetch)
 
       {/* Tabs and Posts Section */}
       <div className="max-w-4xl mx-auto">
-        <ProfileTabs user={user} isCurrentUser={isCurrentUser} />
+        <ProfileTabs user={user} isCurrentUser={isCurrentUser} onPostDeleted={handlePostDeleted}/>
       </div>
     </div>
   )

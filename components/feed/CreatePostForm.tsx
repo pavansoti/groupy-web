@@ -89,11 +89,11 @@ export function CreatePostForm({
         </div>
 
         {preview && (
-          <div className="relative rounded-lg overflow-hidden">
+          <div className="relative w-full h-[340px] bg-muted rounded-lg flex items-center justify-center overflow-hidden">
             <img
               src={preview}
               alt="Preview"
-              className="w-full h-64 object-cover"
+              className="h-full w-auto object-contain"
             />
             <Button
               type="button"
