@@ -17,6 +17,7 @@ import { toast } from 'sonner'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { apiService } from '@/lib/services/api'
 import { getImageUrl } from '@/lib/utils'
+import { EditProfileDialog } from './EditProfileDialog'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
 
@@ -36,6 +37,7 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate }: ProfileHead
   // Bio states
   const [isEditingBio, setIsEditingBio] = useState(false)
   const [bioValue, setBioValue] = useState(user.bio || '')
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(
     getImageUrl(user.profilePicUrl)
@@ -252,7 +254,7 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate }: ProfileHead
           {/* Actions */}
           <div className="flex gap-2">
             {isCurrentUser ? (
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setIsEditDialogOpen(true)}>
                 Edit Profile
               </Button>
             ) : (
@@ -296,6 +298,16 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate }: ProfileHead
         <Stat label="Followers" value={user.followerCount || 0} />
         <Stat label="Following" value={user.followingCount || 0} />
       </div>
+
+      {/* Edit Profile Dialog */}
+      {isCurrentUser && (
+        <EditProfileDialog
+          user={user}
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          onUserUpdate={onUserUpdate}
+        />
+      )}
     </div>
   )
 }
