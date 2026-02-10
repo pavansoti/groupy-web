@@ -10,6 +10,7 @@ import { apiService } from '@/lib/services/api'
 interface ProfileTabsProps {
   user: User
   isCurrentUser: boolean
+  onPostDeleted: () => void
 }
 
 type TabId = 'posts' | 'liked' | 'saved'
@@ -21,7 +22,7 @@ interface Tab {
   show: boolean
 }
 
-export function ProfileTabs({ user: initialUser, isCurrentUser }: ProfileTabsProps) {
+export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }: ProfileTabsProps) {
   const [activeTab, setActiveTab] = useState<TabId>('posts')
   // const [user, setUser] = useState<User>(initialUser)
   const [posts, setPosts] = useState<Post[]>([])  
@@ -104,6 +105,7 @@ export function ProfileTabs({ user: initialUser, isCurrentUser }: ProfileTabsPro
             isCurrentUserProfile={isCurrentUser}
             setPosts={setPosts}
             isLoading={isLoading}
+            onPostDeleted={onPostDeleted}
           />
         )}
 
@@ -120,11 +122,13 @@ function PostsGrid({
   isCurrentUserProfile,
   setPosts,
   isLoading,
+  onPostDeleted
 }: {
   posts: Post[]
   isCurrentUserProfile: boolean
   setPosts: React.Dispatch<React.SetStateAction<Post[]>>
   isLoading: boolean
+  onPostDeleted: () => void
 }) {
 
   if (isLoading) {
@@ -136,6 +140,8 @@ function PostsGrid({
   }
 
   const handleDeleteFromUI = (postId: number) => {
+
+    onPostDeleted()
     console.log('Deleting post with ID:', postId)
     setPosts((prev) => prev.filter((p) => p.id !== postId))
   }
