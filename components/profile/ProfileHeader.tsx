@@ -13,10 +13,12 @@ import {
   X,
 } from 'lucide-react'
 import { User } from '@/app/(main)/profile/[[...id]]/page'
+import { toast } from 'sonner'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { apiService } from '@/lib/services/api'
+import { getImageUrl } from '@/lib/utils'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
 
 interface ProfileHeaderProps {
   user: User
@@ -28,9 +30,10 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate }: ProfileHead
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [isUploading, setIsUploading] = useState(false)
-  const [isFollowing, setIsFollowing] = useState(false)
+  const [isFollowing, setIsFollowing] = useState(user.following ?? false)
+  const [isFollowLoading, setIsFollowLoading] = useState(false)
 
-  // 🆕 Bio states
+  // Bio states
   const [isEditingBio, setIsEditingBio] = useState(false)
   const [bioValue, setBioValue] = useState(user.bio || '')
 
@@ -102,6 +105,51 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate }: ProfileHead
     }
   }
 
+  /* ---------------- FOLLOW/UNFOLLOW ---------------- */
+
+  const handleFollowToggle = async () => {
+    // Store previous state for rollback
+    const previousFollowing = isFollowing
+    const previousCount = user.followerCount
+
+    // Optimistic updates
+    const newFollowing = !isFollowing
+    const newCount = newFollowing
+      ? user.followerCount + 1
+      : Math.max(0, user.followerCount - 1)
+
+    // Apply optimistic state
+    setIsFollowing(newFollowing)
+    onUserUpdate({
+      ...user,
+      followerCount: newCount,
+      following: newFollowing,
+    })
+
+    try {
+      setIsFollowLoading(true)
+
+      if (previousFollowing) {
+        await apiService.unfollowUser(user.id.toString())
+      } else {
+        await apiService.followUser(user.id.toString())
+      }
+    } catch (err) {
+      console.error('Follow action failed:', err)
+      toast.error('Failed to update follow status')
+
+      // Revert state on error
+      setIsFollowing(previousFollowing)
+      onUserUpdate({
+        ...user,
+        followerCount: previousCount,
+        following: previousFollowing,
+      })
+    } finally {
+      setIsFollowLoading(false)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex gap-6 items-start">
@@ -152,7 +200,7 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate }: ProfileHead
             )}
           </div>
 
-          {/* 🆕 BIO SECTION */}
+          {/* BIO SECTION */}
           <div className="space-y-2">
             {isEditingBio ? (
               <>
@@ -209,23 +257,24 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate }: ProfileHead
             ) : (
               <>
                 <Button
-                  size="sm"
-                  variant={isFollowing ? 'outline' : 'default'}
-                  onClick={() => setIsFollowing(!isFollowing)}
-                  className="gap-2"
-                >
-                  {isFollowing ? (
-                    <>
-                      <UserCheck className="h-4 w-4" />
-                      Following
-                    </>
-                  ) : (
-                    <>
-                      <UserPlus className="h-4 w-4" />
-                      Follow
-                    </>
-                  )}
-                </Button>
+                   size="sm"
+                   variant={isFollowing ? 'outline' : 'default'}
+                   onClick={handleFollowToggle}
+                   disabled={isFollowLoading}
+                   className="gap-2"
+                 >
+                   {isFollowing ? (
+                     <>
+                       <UserCheck className="h-4 w-4" />
+                       Following
+                     </>
+                   ) : (
+                     <>
+                       <UserPlus className="h-4 w-4" />
+                       Follow
+                     </>
+                   )}
+                 </Button>
 
                 <Button variant="outline" size="icon">
                   <MessageCircle className="h-4 w-4" />
@@ -242,9 +291,9 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate }: ProfileHead
 
       {/* Stats */}
       <div className="flex gap-8 border-t pt-4">
-        <Stat label="Posts" value={user.posts?.length || 0} />
-        <Stat label="Followers" value={user.followers?.length || 0} />
-        <Stat label="Following" value={user.following?.length || 0} />
+        <Stat label="Posts" value={user.postCount || 0} />
+        <Stat label="Followers" value={user.followerCount || 0} />
+        <Stat label="Following" value={user.followingCount || 0} />
       </div>
     </div>
   )
@@ -259,10 +308,4 @@ function Stat({ label, value }: { label: string; value: number }) {
       <p className="text-xs text-muted-foreground">{label}</p>
     </div>
   )
-}
-
-const getImageUrl = (url?: string | null) => {
-  if (!url) return null
-  if (url.startsWith('http')) return url
-  return `${API_URL}${url}`
 }

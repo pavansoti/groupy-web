@@ -5,13 +5,13 @@ import { SearchInput } from '@/components/search/SearchInput'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import { useUserStore } from '@/lib/stores/userStore'
+// import { useUserStore } from '@/lib/stores/userStore'
 import { useSearch } from '@/lib/hooks/useSearch'
-import Link from 'next/link'
+// import Link from 'next/link'
 
 export default function SearchPage() {
   const router = useRouter()
-  const { getUser, toggleFollow } = useUserStore()
+  // const { getUser, toggleFollow } = useUserStore()
   const { query, results } = useSearch()
 
   const handleSelectResult = (userId: string) => {
@@ -27,7 +27,7 @@ export default function SearchPage() {
 
       <SearchInput onResultSelect={handleSelectResult} />
 
-      {query && results.length > 0 && (
+      {/* {query && results.length > 0 && (
         <div className="space-y-3">
           <h2 className="text-lg font-semibold text-foreground">Search Results</h2>
           {results.map((user) => {
@@ -65,7 +65,7 @@ export default function SearchPage() {
         <Card className="p-12 text-center">
           <p className="text-muted-foreground">No users found matching "{query}"</p>
         </Card>
-      )}
+      )} */}
 
       {!query && (
         <Card className="p-12 text-center">

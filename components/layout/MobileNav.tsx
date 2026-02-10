@@ -35,8 +35,9 @@ export function MobileNav() {
           const isActive = pathname.startsWith(item.href)
 
           return (
-            <Link key={item.href} href={item.href} className="flex-1">
-              <Button
+            <Button
+              key={item.href}
+              asChild
                 variant={isActive ? 'default' : 'ghost'}
                 size="sm"
                 className={cn(
@@ -44,9 +45,10 @@ export function MobileNav() {
                   isActive && 'bg-primary'
                 )}
               >
+              <Link href={item.href} className="flex-1">
                 <Icon className="h-5 w-5" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           )
         })}
       </div>

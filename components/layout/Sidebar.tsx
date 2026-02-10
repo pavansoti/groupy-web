@@ -40,7 +40,10 @@ export function Sidebar({
   const [mounted, setMounted] = useState(false)
   const [isOnline, setIsOnline] = useState(true)
 
+  // Standard Next.js hydration fix: only render after the component is mounted in the browser
   useEffect(() => {
+    setMounted(true)
+    
     const updateStatus = () => setIsOnline(navigator.onLine)
 
     updateStatus()
@@ -51,10 +54,6 @@ export function Sidebar({
       window.removeEventListener('online', updateStatus)
       window.removeEventListener('offline', updateStatus)
     }
-  }, [])
-
-  useEffect(() => {
-    setMounted(true)
   }, [])
 
   if (!mounted) return null
@@ -88,8 +87,9 @@ export function Sidebar({
           const isActive = pathname.startsWith(item.href)
 
           return (
-            <Link key={item.href} href={item.href}>
-              <Button
+            <Button
+              key={item.href}
+              asChild
                 variant={isActive ? 'default' : 'ghost'}
                 className={cn(
                   'w-full justify-start gap-3 transition-all',
@@ -97,6 +97,7 @@ export function Sidebar({
                   isActive && 'bg-primary'
                 )}
               >
+              <Link href={item.href}>
                 <Icon className="h-5 w-5 shrink-0" />
 
                 {/* Label */}
@@ -110,8 +111,8 @@ export function Sidebar({
                 >
                   {item.label}
                 </span>
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           )
         })}
       </nav>

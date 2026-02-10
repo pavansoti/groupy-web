@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { User } from '@/app/(main)/profile/[[...id]]/page'
 import { Heart, Bookmark, Image as ImageIcon } from 'lucide-react'
 import { Post } from '@/lib/stores/feedStore'
 import { PostItem } from './PostItem'
+import { apiService } from '@/lib/services/api'
 
 interface ProfileTabsProps {
   user: User
@@ -22,7 +23,31 @@ interface Tab {
 
 export function ProfileTabs({ user: initialUser, isCurrentUser }: ProfileTabsProps) {
   const [activeTab, setActiveTab] = useState<TabId>('posts')
-  const [user, setUser] = useState<User>(initialUser)
+  // const [user, setUser] = useState<User>(initialUser)
+  const [posts, setPosts] = useState<Post[]>([])  
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+
+    const fetchUser = async () => {
+      
+      setIsLoading(true)
+      setPosts([])
+
+      try {
+        const res = await apiService.getFeeds()
+
+        if (res.data?.success) {
+          setPosts(res.data.data)
+        }
+      } catch (err) {
+        console.error('Profile pic upload failed')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchUser()
+  }, [activeTab])
 
   const tabs: Tab[] = [
     {
@@ -73,21 +98,18 @@ export function ProfileTabs({ user: initialUser, isCurrentUser }: ProfileTabsPro
 
       {/* Tab Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
-      {activeTab === 'posts' && (
+        {activeTab === 'posts' && (
           <PostsGrid
-            posts={user.posts}
+            posts={posts}
             isCurrentUserProfile={isCurrentUser}
-            setPosts={(updater) =>
-              setUser((prev) =>
-                prev ? { ...prev, posts: typeof updater === 'function'
-                  ? updater(prev.posts)
-                  : updater } : prev
-              )
-            }
+            setPosts={setPosts}
+            isLoading={isLoading}
           />
         )}
-        {activeTab === 'liked' && isCurrentUser && <LikedPostsGrid />}
-        {activeTab === 'saved' && isCurrentUser && <SavedPostsGrid />}
+
+        {activeTab === 'liked' && isCurrentUser && <LikedPostsGrid isLoading={isLoading}/>}
+
+        {activeTab === 'saved' && isCurrentUser && <SavedPostsGrid isLoading={isLoading}/>}
       </div>
     </div>
   )
@@ -97,16 +119,24 @@ function PostsGrid({
   posts,
   isCurrentUserProfile,
   setPosts,
+  isLoading,
 }: {
   posts: Post[]
   isCurrentUserProfile: boolean
   setPosts: React.Dispatch<React.SetStateAction<Post[]>>
+  isLoading: boolean
 }) {
+
+  if (isLoading) {
+    return <EmptyState message="Loading..." />
+  }
+
   if (!posts || posts.length === 0) {
     return <EmptyState message="No posts yet" />
   }
 
   const handleDeleteFromUI = (postId: number) => {
+    console.log('Deleting post with ID:', postId)
     setPosts((prev) => prev.filter((p) => p.id !== postId))
   }
 
@@ -124,7 +154,12 @@ function PostsGrid({
   )
 }
 
-function LikedPostsGrid() {
+function LikedPostsGrid({ isLoading }: { isLoading: boolean }){
+
+  if (isLoading) {
+    return <EmptyState message="Loading..." />
+  }
+
   const hasNoLikedPosts = true // TODO: Replace with actual data check
 
   if (hasNoLikedPosts) {
@@ -138,7 +173,12 @@ function LikedPostsGrid() {
   )
 }
 
-function SavedPostsGrid() {
+function SavedPostsGrid({ isLoading }: { isLoading: boolean }) {
+
+  if (isLoading) {
+    return <EmptyState message="Loading..." />
+  }
+
   const hasNoSavedPosts = true // TODO: Replace with actual data check
 
   if (hasNoSavedPosts) {

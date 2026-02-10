@@ -7,20 +7,17 @@ import { useRouter } from 'next/navigation'
 export function useAuth() {
   const { user, token, isAuthenticated, setUser, setToken, logout: storeLogout } = useAuthStore()
   const router = useRouter()
-  const [isReady, setIsReady] = useState(false)
   const [mounted, setMounted] = useState(false)
 
+  // Standard Next.js hydration fix: only set mounted to true after the component is in the browser
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  useEffect(() => {
-    if (mounted) {
-      setIsReady(true)
-    }
-  }, [mounted])
-
   const logout = useCallback(() => {
+    // Clear the token cookie
+    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+    
     storeLogout()
     router.push('/auth/signin')
   }, [router, storeLogout])
@@ -29,7 +26,7 @@ export function useAuth() {
     user,
     token,
     isAuthenticated,
-    isReady,
+    mounted,
     setUser,
     setToken,
     logout,

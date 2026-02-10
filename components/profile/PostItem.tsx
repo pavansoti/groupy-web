@@ -2,20 +2,22 @@ import { Heart, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { apiService } from '@/lib/services/api'
 import { Post } from '@/lib/stores/feedStore'
+import { getImageUrl } from '@/lib/utils'
+import { toast } from 'sonner'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
 
 interface PostItemProps {
   post: Post
   isCurrentUserProfile: boolean
-  onDelete: (postId: number) => void
+  onDelete: (postId: string | number) => void
 }
 
 export function PostItem({ post, isCurrentUserProfile, onDelete }: PostItemProps) {
   const imageSrc = getImageUrl(post.imageUrl)
 
-  const [liked, setLiked] = useState(post.isLiked ?? false)
-  const [likesCount, setLikesCount] = useState(post.likes?.length ?? 0)
+  const [liked, setLiked] = useState(post.likedByCurrentUser ?? false)
+  const [likesCount, setLikesCount] = useState(post.likeCount ?? 0)
 
   /* ---------------- LIKE ---------------- */
 
@@ -47,10 +49,15 @@ export function PostItem({ post, isCurrentUserProfile, onDelete }: PostItemProps
     if (!confirm('Delete this post?')) return
 
     try {
-    //   await apiService.deletePost(post.id)
-    //   onDelete(post.id);
+      const res = await apiService.deletePost(post.id)
+      if(res.data?.success){ 
+        onDelete(post.id);
+        toast('Post deleted')
+      } else {
+        toast('Failed to delete post')
+      }
     } catch {
-      alert('Failed to delete post')
+      toast('Failed to delete post')
     }
   }
 
@@ -90,11 +97,4 @@ export function PostItem({ post, isCurrentUserProfile, onDelete }: PostItemProps
       </div>
     </div>
   )
-}
-
-
-const getImageUrl = (url?: string | null) => {
-    if (!url) return ''
-    if (url.startsWith('http')) return url
-    return `${API_URL}${url}`
 }

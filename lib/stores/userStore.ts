@@ -41,6 +41,7 @@ export const useUserStore = create<UserState>((set, get) => ({
 
   getUser: (userId) => {
     const state = get()
+    console.log(state.users.get(userId))
     return state.users.get(userId)
   },
 

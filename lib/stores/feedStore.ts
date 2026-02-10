@@ -17,10 +17,10 @@ export interface Post {
   imageUrl?: string
   caption: string
   likes?: any []
-  likesCount?: number
+  likeCount?: number
   commentsCount: number
   createdAt: string
-  isLiked: boolean
+  likedByCurrentUser: boolean
   comments: Comment[]
 }
 
@@ -72,8 +72,8 @@ export const useFeedStore = create<FeedState>((set) => ({
         post.id === postId
           ? {
               ...post,
-              isLiked: !post.isLiked,
-              likesCount: post.isLiked ? post.likesCount - 1 : post.likesCount + 1,
+              likedByCurrentUser: !post.likedByCurrentUser,
+              likeCount: post.likedByCurrentUser ? post.likeCount - 1 : post.likeCount + 1,
             }
           : post
       ),
