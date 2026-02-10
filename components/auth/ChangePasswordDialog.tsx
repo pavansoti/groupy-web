@@ -9,12 +9,13 @@ import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogFooter,
+} from '@/components/ui/alert-dialog'
 import { Eye, EyeOff } from 'lucide-react'
 
 const changePasswordSchema = z
@@ -86,14 +87,14 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Change Password</DialogTitle>
-          <DialogDescription>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="sm:max-w-[425px]">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Change Password</AlertDialogTitle>
+          <AlertDialogDescription>
             Enter your current password and choose a new one
-          </DialogDescription>
-        </DialogHeader>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
@@ -184,7 +185,7 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
             )}
           </div>
 
-          <div className="flex gap-3 pt-4">
+          <AlertDialogFooter className="flex gap-3 pt-4">
             <Button
               type="button"
               variant="outline"
@@ -197,9 +198,9 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
             <Button type="submit" disabled={isLoading} className="flex-1">
               {isLoading ? 'Changing...' : 'Change Password'}
             </Button>
-          </div>
+          </AlertDialogFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
