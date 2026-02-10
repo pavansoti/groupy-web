@@ -158,8 +158,8 @@ class ApiService {
     return this.api.get('/api/posts/feed/following', { params: { limit, offset } })
   }
 
-  async getFeeds(limit: number = 100, offset: number = 0) {
-    return this.api.get('/api/posts/feeds', { params: { limit, offset } })
+  async getFeeds(userId: string | number, limit: number = 100, offset: number = 0) {
+    return this.api.get(`/api/posts/feeds/${userId}`, { params: { limit, offset } })
   }
 
   //---------

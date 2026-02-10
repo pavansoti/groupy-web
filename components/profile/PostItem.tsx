@@ -1,9 +1,22 @@
+"use client"
+
 import { Heart, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { apiService } from '@/lib/services/api'
 import { Post } from '@/lib/stores/feedStore'
 import { getImageUrl } from '@/lib/utils'
 import { toast } from 'sonner'
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
 
@@ -43,13 +56,10 @@ export function PostItem({ post, isCurrentUserProfile, onDelete }: PostItemProps
 
   /* ---------------- DELETE ---------------- */
 
-  const handleDelete = async (e: React.MouseEvent) => {
-    e.stopPropagation()
-
-    if (!confirm('Delete this post?')) return
+  const handleDeletePost = async (postId: string | number) => {
 
     try {
-      const res = await apiService.deletePost(post.id)
+      const res = await apiService.deletePost(postId)
       if(res.data?.success){ 
         onDelete(post.id);
         toast('Post deleted')
@@ -87,12 +97,35 @@ export function PostItem({ post, isCurrentUserProfile, onDelete }: PostItemProps
 
         {/* DELETE (self profile only) */}
         {isCurrentUserProfile && (
-          <button
-            onClick={handleDelete}
-            className="absolute top-2 right-2 bg-black/60 hover:bg-black p-1.5 rounded-full"
-          >
-            <Trash2 className="h-4 w-4 text-red-500" />
-          </button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button
+                className="absolute top-2 right-2 bg-black/60 hover:bg-black p-1.5 rounded-full"
+              >
+                <Trash2 className="h-4 w-4 text-red-500" />
+              </button>
+            </AlertDialogTrigger>
+          
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete post?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. Your post will be permanently deleted.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+          
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+          
+                <AlertDialogAction
+                  className="bg-red-500 hover:bg-red-600"
+                  onClick={() => handleDeletePost(post.id)}
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
       </div>
     </div>
