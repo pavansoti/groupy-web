@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useState } from 'react'
 import { useFeedStore } from '@/lib/stores/feedStore'
 import { PostCard } from './PostCard'
 import { CreatePostForm } from './CreatePostForm'
@@ -32,10 +32,10 @@ export function FeedContent() {
     setIsCreating(true)
     try {
       const res = await apiService.createPost(formData)
-  
+
       if (res.data.success) {
         toast.success('Post created successfully')
-  
+
         const response = await apiService.getFeedFollowing()
         setPosts(response.data.data)
         return true

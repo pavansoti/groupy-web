@@ -95,48 +95,59 @@ export function SearchInput({ onResultSelect }: SearchInputProps) {
           ) : (
             <div className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
               {displayResults.length === 0 ? (
-            <div className="p-4 text-center text-muted-foreground">No users found</div>
-          ) : (
-            <div className="divide-y divide-border">
-              {displayResults.map((user) => {
-                if (!user) {
-                  return null
-                }
-                return (
-                  <div key={user.id} className="p-4 flex items-center justify-between">
-                    <button
-                      key={user.id}
-                      onClick={() => {
-                        onResultSelect?.(user.id)
-                        setQuery('')
-                      }}
-                      className="w-full p-4 flex items-center gap-3 cursor-pointer transition-colors text-left"
-                    >
-                      <div className="h-10 w-10 rounded-full bg-primary/50 flex items-center justify-center text-sm font-semibold flex-shrink-0">
-                        {user.profilePicUrl ? (
-                          <img src={getImageUrl(user.profilePicUrl) || "/placeholder.svg"} alt={user.username} className="h-10 w-10 rounded-full object-cover" />
-                        ) : (
-                          user.username.charAt(0).toUpperCase()
+                <div className="p-4 text-center text-muted-foreground">
+                  No users found
+                </div>
+              ) : (
+                <div className="divide-y divide-border">
+                  {displayResults.map((user) => {
+                    if (!user) return null
+
+                    return (
+                      <div key={user.id} className="p-4 flex items-center justify-between">
+                        <button
+                          onClick={() => {
+                            onResultSelect?.(user.id)
+                            setQuery('')
+                          }}
+                          className="w-full flex items-center gap-3 cursor-pointer transition-colors text-left"
+                        >
+                          <div className="h-10 w-10 rounded-full bg-primary/50 flex items-center justify-center text-sm font-semibold flex-shrink-0">
+                            {user.profilePicUrl ? (
+                              <img
+                                src={getImageUrl(user.profilePicUrl) || '/placeholder.svg'}
+                                alt={user.username}
+                                className="h-10 w-10 rounded-full object-cover"
+                              />
+                            ) : (
+                              user.username.charAt(0).toUpperCase()
+                            )}
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-foreground text-sm">
+                              {user.username}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {user.followerCount} followers
+                            </p>
+                          </div>
+                        </button>
+
+                        {currentUser?.id !== user.id && (
+                          <Button
+                            size="sm"
+                            variant={user.following ? 'secondary' : 'default'}
+                            onClick={() => toggleFollow(user.id)}
+                            className="ml-2 flex-shrink-0"
+                          >
+                            {user.following ? 'Following' : 'Follow'}
+                          </Button>
                         )}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-foreground text-sm">{user.username}</p>
-                        <p className="text-xs text-muted-foreground truncate">{user.followerCount} followers</p>
-                      </div>
-                    </button>
-                    {
-                      currentUser?.id !== user.id && <Button
-                        size="sm"
-                        variant={user?.following ? 'secondary' : 'default'}
-                        onClick={() => toggleFollow(user.id)}
-                        className="ml-2 flex-shrink-0 cursor-pointer"
-                      >
-                        {user?.following ? 'Following' : 'Follow'}
-                      </Button>
-                    }
-                  </div>
-                )
-              })}
+                    )
+                  })}
+                </div>
               )}
             </div>
           )}
