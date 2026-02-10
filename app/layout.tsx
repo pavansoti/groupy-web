@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { ToastProvider } from '@/components/providers/ToastProvider'
+import { AuthProvider } from '@/components/providers/AuthProvider'
 import './globals.css'
 import { BubbleBackground } from "@/components/ui/BubbleBackground"
 
@@ -45,12 +46,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`font-sans antialiased`}>
-        <ThemeProvider>
-          <BubbleBackground />
-          <ToastProvider />
-          {children}
-        </ThemeProvider>
+      <body className="font-sans antialiased" suppressHydrationWarning>
+        <AuthProvider>
+          <ThemeProvider>
+            <BubbleBackground />
+            <ToastProvider />
+            {children}
+          </ThemeProvider>
+        </AuthProvider>
         <Analytics />
       </body>
     </html>

@@ -1,5 +1,7 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+
 const bubbles = [
   { size: 120, left: '10%', duration: 22, color: 'var(--bubble-1)' },
   { size: 80, left: '30%', duration: 18, color: 'var(--bubble-2)' },
@@ -9,6 +11,14 @@ const bubbles = [
 ]
 
 export function BubbleBackground() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
+
   return (
     <>
       <div className="bubble-blobs" />

@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
 import { createPostSchema, CreatePostFormData } from '@/lib/schemas/post'
 import { ImageIcon, X } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface CreatePostFormProps {
   onSubmit: (formData: FormData) => Promise<void>
@@ -61,6 +62,7 @@ export function CreatePostForm({
     }
 
     await onSubmit(formData)
+    toast.success('Post created successfully')
     reset()
     clearPreview()
   }

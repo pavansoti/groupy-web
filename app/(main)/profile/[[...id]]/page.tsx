@@ -15,12 +15,15 @@ export interface User {
   bio: string | null
   role: string
   posts: any[]
-  followers: any[]
-  following: any[]
+  // followers: any[]
+  // following: any[]
+  followerCount: number
+  followingCount: number
+  postCount: number
   createdAt: string
   profilePicUrl: string | null
-  isPrivate: boolean
-  isFollowing: boolean
+  Private: boolean
+  following: boolean
 }
 
 export default function ProfilePage() {

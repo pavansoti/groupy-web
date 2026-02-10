@@ -58,6 +58,9 @@ export function SigninForm() {
         role: payload.role,
       }
   
+      // Set token in cookie for middleware
+      document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`
+
       apiService.setToken(token)
       setToken(token)
       setUser(user)

@@ -6,9 +6,10 @@ import { apiService } from '@/lib/services/api'
 interface SearchResult {
   id: string
   username: string
-  bio?: string
-  profilePicture?: string
-  followersCount: number
+  bio: string
+  profilePicUrl: string
+  followerCount: number
+  following: boolean
 }
 
 export function useSearch() {
@@ -28,8 +29,9 @@ export function useSearch() {
       setError(null)
 
       try {
+        setResults([])
         const response = await apiService.searchUsers(searchQuery)
-        setResults(response.data || [])
+        setResults(response.data.data || [])
       } catch (err: any) {
         setError(err.message || 'Search failed')
         setResults([])

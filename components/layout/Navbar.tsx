@@ -17,12 +17,7 @@ import { ThemePicker } from '../providers/ThemePicker'
 
 function NavbarContent() {
   const { theme, setTheme } = useTheme()
-  const { user, logout } = useAuth()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const { user, logout, mounted } = useAuth()
 
   const handleLogout = () => {
     sessionStorage.clear()

@@ -16,13 +16,13 @@ const MOCK_POSTS = [
     authorProfilePicture: undefined,
     image: undefined,
     caption: 'Just launched my new project 🚀',
-    likesCount: 234,
+    likeCount: 234,
     commentsCount: 12,
     createdAt: new Date().toISOString(),
-    isLiked: false,
+    likedByCurrentUser: false,
     comments: [],
   },
-  { id: '2', authorId: 'user2', authorUsername: 'Jane Smith', authorProfilePicture: undefined, image: undefined, caption: 'Beautiful sunset today at the beach 🌅', likesCount: 456, commentsCount: 28, createdAt: new Date(Date.now() - 3600000).toISOString(), isLiked: false, comments: [], }, { id: '3', authorId: 'user3', authorUsername: 'Tech Enthusiast', authorProfilePicture: undefined, image: undefined, caption: 'Learning TypeScript has been a game changer for my development workflow!', likesCount: 189, commentsCount: 45, createdAt: new Date(Date.now() - 7200000).toISOString(), isLiked: false, comments: [], },
+  { id: '2', authorId: 'user2', authorUsername: 'Jane Smith', authorProfilePicture: undefined, image: undefined, caption: 'Beautiful sunset today at the beach 🌅', likeCount: 456, commentsCount: 28, createdAt: new Date(Date.now() - 3600000).toISOString(), likedByCurrentUser: false, comments: [], }, { id: '3', authorId: 'user3', authorUsername: 'Tech Enthusiast', authorProfilePicture: undefined, image: undefined, caption: 'Learning TypeScript has been a game changer for my development workflow!', likeCount: 189, commentsCount: 45, createdAt: new Date(Date.now() - 7200000).toISOString(), likedByCurrentUser: false, comments: [], },
 ]
 
 export function FeedContent() {
@@ -35,7 +35,7 @@ export function FeedContent() {
     if (posts.length === 0) {
       const fetchPosts = async () => {
         try {
-          const response = await apiService.getFeed();
+          const response = await apiService.getFeedFollowing();
           console.log('Fetched posts:', response.data.data)
           // setPosts(response.data.data)
           setPosts(MOCK_POSTS)

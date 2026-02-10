@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosInstance } from 'axios'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
 const TOKEN_KEY = process.env.NEXT_PUBLIC_AUTH_TOKEN_KEY || 'auth_token'
 
 class ApiService {
@@ -31,8 +31,19 @@ class ApiService {
       (response) => response,
       (error: AxiosError) => {
         if (error.response?.status === 401) {
+          if (typeof document !== 'undefined') {
+            document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+          }
           this.clearToken()
-          window.location.href = '/auth/signin'
+
+          if (typeof window !== 'undefined') {
+            const pathname = window.location.pathname
+            if (pathname !== '/auth/signin') {
+              window.history.replaceState(null, '', '/auth/signin')
+              window.dispatchEvent(new PopStateEvent('popstate'))
+            }
+          }
+          
         }
         return Promise.reject(error)
       }
@@ -93,29 +104,62 @@ class ApiService {
   }
 
   async searchUsers(query: string) {
-    return this.api.get('/api/users/search', { params: { query: query } })
+    return this.api.get('/api/users/search', { params: { q: query } })
   }
 
   // Follow endpoints
-  async followUser(userId: string) {
-    return this.api.post(`/users/${userId}/follow`)
+  /**
+   * Follow a user
+   * @param targetUserId - The ID of the user to follow
+   * 
+   * Implementation note:
+   * - The current/source user (who is following) is determined from the JWT auth token
+   * - The target user (who is being followed) is passed as the URL parameter
+   * 
+   * Example: If user A wants to follow user B:
+   * - Auth token contains user A's ID
+   * - targetUserId parameter is user B's ID
+   * - Endpoint: POST /api/users/{B}/follow
+   */
+  async followUser(targetUserId: string) {
+    return this.api.post(`/api/users/${targetUserId}/follow`)
   }
 
-  async unfollowUser(userId: string) {
-    return this.api.delete(`/users/${userId}/follow`)
+  /**
+   * Unfollow a user
+   * @param targetUserId - The ID of the user to unfollow
+   * 
+   * Implementation note:
+   * - The current/source user (who is unfollowing) is determined from the JWT auth token
+   * - The target user (who is being unfollowed) is passed as the URL parameter
+   */
+  async unfollowUser(targetUserId: string) {
+    return this.api.delete(`/api/users/${targetUserId}/unfollow`)
   }
 
+  /**
+   * Get followers of a user
+   * @param userId - The user whose followers to fetch
+   */
   async getFollowers(userId: string) {
-    return this.api.get(`/users/${userId}/followers`)
+    return this.api.get(`/api/users/${userId}/followers`)
   }
 
+  /**
+   * Get users that a user is following
+   * @param userId - The user whose following list to fetch
+   */
   async getFollowing(userId: string) {
-    return this.api.get(`/users/${userId}/following`)
+    return this.api.get(`/api/users/${userId}/following`)
   }
 
   // Feed endpoints
-  async getFeed(limit: number = 10, offset: number = 0) {
-    return this.api.get('/api/posts/feed', { params: { limit, offset } })
+  async getFeedFollowing(limit: number = 100, offset: number = 0) {
+    return this.api.get('/api/posts/feed/following', { params: { limit, offset } })
+  }
+
+  async getFeeds(limit: number = 100, offset: number = 0) {
+    return this.api.get('/api/posts/feeds', { params: { limit, offset } })
   }
 
   //---------
@@ -123,6 +167,10 @@ class ApiService {
     return this.api.post('/api/posts', data, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
+  }
+
+  async deletePost(postId: string | number) {
+    return this.api.delete(`/api/posts/${postId}`)
   }
 
   async getPost(postId: string) {
