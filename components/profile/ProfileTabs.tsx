@@ -155,20 +155,80 @@ function PostsGrid({
 }
 
 function LikedPostsGrid({ isLoading }: { isLoading: boolean }){
+  const [likedPosts, setLikedPosts] = useState<Post[]>([])
+  const [gridLoading, setGridLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  if (isLoading) {
-    return <EmptyState message="Loading..." />
+  useEffect(() => {
+    const fetchLikedPosts = async () => {
+      setGridLoading(true)
+      setError(null)
+      
+      try {
+        const res = await apiService.getFeedFollowing(100, 0)
+        
+        if (res.data?.success && res.data?.data) {
+          // Filter posts that are liked by current user
+          const liked = res.data.data.filter((post: Post) => post.likedByCurrentUser)
+          setLikedPosts(liked)
+        }
+      } catch (err) {
+        console.error('Failed to fetch liked posts:', err)
+        setError('Failed to load liked posts')
+      } finally {
+        setGridLoading(false)
+      }
+    }
+
+    fetchLikedPosts()
+  }, [])
+
+  if (isLoading || gridLoading) {
+    return (
+      <div className="grid grid-cols-3 gap-1 sm:gap-2 py-6">
+        {Array.from({ length: 9 }).map((_, i) => (
+          <div
+            key={i}
+            className="aspect-square bg-muted animate-pulse rounded"
+          />
+        ))}
+      </div>
+    )
   }
 
-  const hasNoLikedPosts = true // TODO: Replace with actual data check
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <p className="text-destructive text-sm mb-2">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-xs text-muted-foreground hover:text-foreground underline"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    )
+  }
 
-  if (hasNoLikedPosts) {
+  if (likedPosts.length === 0) {
     return <EmptyState message="No liked posts" />
   }
 
   return (
     <div className="grid grid-cols-3 gap-1 sm:gap-2 py-6">
-      {/* TODO: Fetch and display liked posts */}
+      {likedPosts.map((post) => (
+        <PostItem
+          key={post.id}
+          post={post}
+          isCurrentUserProfile={false}
+          onDelete={() => {
+            // Remove post from liked posts if deleted
+            setLikedPosts((prev) => prev.filter((p) => p.id !== post.id))
+          }}
+        />
+      ))}
     </div>
   )
 }
