@@ -162,6 +162,10 @@ class ApiService {
     return this.api.get(`/api/posts/feeds/${userId}`, { params: { limit, offset } })
   }
 
+  async getLikedPosts(limit: number = 100, offset: number = 0) {
+    return this.api.get('/api/posts/feeds/liked', { params: { limit, offset } })
+  }
+
   //---------
   async createPost(data: FormData) {
     return this.api.post('/api/posts', data, {

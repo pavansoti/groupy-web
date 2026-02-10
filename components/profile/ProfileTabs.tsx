@@ -165,12 +165,10 @@ function LikedPostsGrid({ isLoading }: { isLoading: boolean }){
       setError(null)
       
       try {
-        const res = await apiService.getFeedFollowing(100, 0)
+        const res = await apiService.getLikedPosts(100, 0)
         
         if (res.data?.success && res.data?.data) {
-          // Filter posts that are liked by current user
-          const liked = res.data.data.filter((post: Post) => post.likedByCurrentUser)
-          setLikedPosts(liked)
+          setLikedPosts(res.data.data)
         }
       } catch (err) {
         console.error('Failed to fetch liked posts:', err)
@@ -216,6 +214,11 @@ function LikedPostsGrid({ isLoading }: { isLoading: boolean }){
     return <EmptyState message="No liked posts" />
   }
 
+  const handleUnlike = (postId: string | number) => {
+    // Remove post from liked posts when unliked
+    setLikedPosts((prev) => prev.filter((p) => p.id !== postId))
+  }
+
   return (
     <div className="grid grid-cols-3 gap-1 sm:gap-2 py-6">
       {likedPosts.map((post) => (
@@ -227,6 +230,7 @@ function LikedPostsGrid({ isLoading }: { isLoading: boolean }){
             // Remove post from liked posts if deleted
             setLikedPosts((prev) => prev.filter((p) => p.id !== post.id))
           }}
+          onUnlike={handleUnlike}
         />
       ))}
     </div>
