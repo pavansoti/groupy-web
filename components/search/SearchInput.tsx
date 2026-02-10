@@ -10,6 +10,7 @@ import { Card } from '../ui/card'
 import { apiService } from '@/lib/services/api'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/lib/stores/authStore'
+import { SearchResultSkeleton } from '@/components/skeletons'
 
 interface SearchInputProps {
   onResultSelect?: (userId: string) => void
@@ -88,10 +89,12 @@ export function SearchInput({ onResultSelect }: SearchInputProps) {
       </div>
 
       {query && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+        <>
           {isLoading ? (
-            <div className="p-4 text-center text-muted-foreground">Loading...</div>
-          ) : displayResults.length === 0 ? (
+            <SearchResultSkeleton />
+          ) : (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-background border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+              {displayResults.length === 0 ? (
             <div className="p-4 text-center text-muted-foreground">No users found</div>
           ) : (
             <div className="divide-y divide-border">
@@ -134,9 +137,10 @@ export function SearchInput({ onResultSelect }: SearchInputProps) {
                   </div>
                 )
               })}
+              )}
             </div>
           )}
-        </div>
+        </>
       )}
     </div>
   )

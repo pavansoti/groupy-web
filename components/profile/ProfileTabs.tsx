@@ -6,6 +6,7 @@ import { Heart, Bookmark, Image as ImageIcon } from 'lucide-react'
 import { Post } from '@/lib/stores/feedStore'
 import { PostItem } from './PostItem'
 import { apiService } from '@/lib/services/api'
+import { PostGridSkeleton } from '@/components/skeletons'
 
 interface ProfileTabsProps {
   user: User
@@ -128,7 +129,7 @@ function PostsGrid({
 }) {
 
   if (isLoading) {
-    return <EmptyState message="Loading..." />
+    return <PostGridSkeleton />
   }
 
   if (!posts || posts.length === 0) {
@@ -182,16 +183,7 @@ function LikedPostsGrid({ isLoading }: { isLoading: boolean }){
   }, [])
 
   if (isLoading || gridLoading) {
-    return (
-      <div className="grid grid-cols-3 gap-1 sm:gap-2 py-6">
-        {Array.from({ length: 9 }).map((_, i) => (
-          <div
-            key={i}
-            className="aspect-square bg-muted animate-pulse rounded"
-          />
-        ))}
-      </div>
-    )
+    return <PostGridSkeleton />
   }
 
   if (error) {
@@ -240,7 +232,7 @@ function LikedPostsGrid({ isLoading }: { isLoading: boolean }){
 function SavedPostsGrid({ isLoading }: { isLoading: boolean }) {
 
   if (isLoading) {
-    return <EmptyState message="Loading..." />
+    return <PostGridSkeleton />
   }
 
   const hasNoSavedPosts = true // TODO: Replace with actual data check
