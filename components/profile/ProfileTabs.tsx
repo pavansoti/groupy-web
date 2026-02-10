@@ -6,6 +6,7 @@ import { Heart, Bookmark, Image as ImageIcon } from 'lucide-react'
 import { Post } from '@/lib/stores/feedStore'
 import { PostItem } from './PostItem'
 import { apiService } from '@/lib/services/api'
+import { PostGridSkeleton } from '@/components/skeletons'
 
 interface ProfileTabsProps {
   user: User
@@ -132,7 +133,7 @@ function PostsGrid({
 }) {
 
   if (isLoading) {
-    return <EmptyState message="Loading..." />
+    return <PostGridSkeleton />
   }
 
   if (!posts || posts.length === 0) {
@@ -161,20 +162,75 @@ function PostsGrid({
 }
 
 function LikedPostsGrid({ isLoading }: { isLoading: boolean }){
+  const [likedPosts, setLikedPosts] = useState<Post[]>([])
+  const [gridLoading, setGridLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  if (isLoading) {
-    return <EmptyState message="Loading..." />
+  useEffect(() => {
+    const fetchLikedPosts = async () => {
+      setGridLoading(true)
+      setError(null)
+      
+      try {
+        const res = await apiService.getLikedPosts(100, 0)
+        
+        if (res.data?.success && res.data?.data) {
+          setLikedPosts(res.data.data)
+        }
+      } catch (err) {
+        console.error('Failed to fetch liked posts:', err)
+        setError('Failed to load liked posts')
+      } finally {
+        setGridLoading(false)
+      }
+    }
+
+    fetchLikedPosts()
+  }, [])
+
+  if (isLoading || gridLoading) {
+    return <PostGridSkeleton />
   }
 
-  const hasNoLikedPosts = true // TODO: Replace with actual data check
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <p className="text-destructive text-sm mb-2">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-xs text-muted-foreground hover:text-foreground underline"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    )
+  }
 
-  if (hasNoLikedPosts) {
+  if (likedPosts.length === 0) {
     return <EmptyState message="No liked posts" />
+  }
+
+  const handleUnlike = (postId: string | number) => {
+    // Remove post from liked posts when unliked
+    setLikedPosts((prev) => prev.filter((p) => p.id !== postId))
   }
 
   return (
     <div className="grid grid-cols-3 gap-1 sm:gap-2 py-6">
-      {/* TODO: Fetch and display liked posts */}
+      {likedPosts.map((post) => (
+        <PostItem
+          key={post.id}
+          post={post}
+          isCurrentUserProfile={false}
+          onDelete={() => {
+            // Remove post from liked posts if deleted
+            setLikedPosts((prev) => prev.filter((p) => p.id !== post.id))
+          }}
+          onUnlike={handleUnlike}
+        />
+      ))}
     </div>
   )
 }
@@ -182,7 +238,7 @@ function LikedPostsGrid({ isLoading }: { isLoading: boolean }){
 function SavedPostsGrid({ isLoading }: { isLoading: boolean }) {
 
   if (isLoading) {
-    return <EmptyState message="Loading..." />
+    return <PostGridSkeleton />
   }
 
   const hasNoSavedPosts = true // TODO: Replace with actual data check

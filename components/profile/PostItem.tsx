@@ -24,9 +24,10 @@ interface PostItemProps {
   post: Post
   isCurrentUserProfile: boolean
   onDelete: (postId: string | number) => void
+  onUnlike?: (postId: string | number) => void
 }
 
-export function PostItem({ post, isCurrentUserProfile, onDelete }: PostItemProps) {
+export function PostItem({ post, isCurrentUserProfile, onDelete, onUnlike }: PostItemProps) {
   const imageSrc = getImageUrl(post.imageUrl)
 
   const [liked, setLiked] = useState(post.likedByCurrentUser ?? false)
@@ -37,6 +38,8 @@ export function PostItem({ post, isCurrentUserProfile, onDelete }: PostItemProps
   const handleLike = async (e: React.MouseEvent) => {
     e.stopPropagation()
 
+    const wasLiked = liked
+
     // optimistic update
     setLiked((prev) => !prev)
     setLikesCount((prev) => (liked ? prev - 1 : prev + 1))
@@ -46,11 +49,15 @@ export function PostItem({ post, isCurrentUserProfile, onDelete }: PostItemProps
         await apiService.likePost(post.id)
       } else {
         await apiService.unlikePost(post.id)
+        // Call onUnlike callback if provided (for removing from liked posts grid)
+        if (onUnlike) {
+          onUnlike(post.id)
+        }
       }
     } catch {
       // rollback on error
       setLiked((prev) => !prev)
-      setLikesCount((prev) => (liked ? prev + 1 : prev - 1))
+      setLikesCount((prev) => (wasLiked ? prev + 1 : prev - 1))
     }
   }
 

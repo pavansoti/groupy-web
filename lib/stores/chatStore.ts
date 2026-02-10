@@ -7,6 +7,7 @@ export interface Message {
   senderUsername: string
   senderProfilePicture?: string
   content: string
+  type?: 'text' | 'file' | 'audio'
   createdAt: string
   isRead: boolean
 }

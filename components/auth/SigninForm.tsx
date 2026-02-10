@@ -133,16 +133,26 @@ export function SigninForm() {
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? 'Signing in...' : 'Sign In'}
           </Button>
-  
-          <p className="text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{' '}
-            <Link
-              href="/auth/signup"
-              className="text-primary hover:underline"
-            >
-              Sign up
-            </Link>
-          </p>
+
+          <div className="flex flex-col gap-2 text-sm">
+            <div className="text-center text-muted-foreground">
+              Don&apos;t have an account?{' '}
+              <Link
+                href="/auth/signup"
+                className="text-primary hover:underline"
+              >
+                Sign up
+              </Link>
+            </div>
+            <div className="text-center">
+              <Link
+                href="/auth/forgot-password"
+                className="text-sm text-muted-foreground hover:text-primary hover:underline transition-colors"
+              >
+                Forgot your password?
+              </Link>
+            </div>
+          </div>
         </form>
       </CardContent>
     </Card>

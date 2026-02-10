@@ -11,13 +11,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Moon, Sun, LogOut, User } from 'lucide-react'
+import { Moon, Sun, LogOut, User, Lock } from 'lucide-react'
 import Link from 'next/link'
 import { ThemePicker } from '../providers/ThemePicker'
+import { ChangePasswordDialog } from '../auth/ChangePasswordDialog'
 
 function NavbarContent() {
   const { theme, setTheme } = useTheme()
   const { user, logout, mounted } = useAuth()
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false)
 
   const handleLogout = () => {
     sessionStorage.clear()
@@ -78,6 +80,11 @@ function NavbarContent() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setChangePasswordOpen(true)} className="flex items-center gap-2">
+                  <Lock className="h-4 w-4" />
+                  Change Password
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                   <LogOut className="h-4 w-4 mr-2" />
                   Logout
@@ -87,6 +94,11 @@ function NavbarContent() {
           )}
         </div>
       </div>
+
+      <ChangePasswordDialog
+        open={changePasswordOpen}
+        onOpenChange={setChangePasswordOpen}
+      />
     </nav>
   )
 }

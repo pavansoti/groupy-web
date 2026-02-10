@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { UserProfile } from '@/lib/stores/userStore'
 import Link from 'next/link'
+import { FollowersListSkeleton } from '@/components/skeletons'
 
 interface FollowersListProps {
   followers: UserProfile[]
@@ -12,6 +13,10 @@ interface FollowersListProps {
 }
 
 export function FollowersList({ followers, isLoading = false, onFollowChange }: FollowersListProps) {
+  if (isLoading) {
+    return <FollowersListSkeleton />
+  }
+
   if (followers.length === 0) {
     return (
       <Card className="p-6 text-center">

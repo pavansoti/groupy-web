@@ -17,6 +17,8 @@ import { toast } from 'sonner'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { apiService } from '@/lib/services/api'
 import { getImageUrl } from '@/lib/utils'
+import { EditProfileDialog } from './EditProfileDialog'
+import { ProfileHeaderSkeleton } from '@/components/skeletons'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
 
@@ -24,9 +26,14 @@ interface ProfileHeaderProps {
   user: User
   isCurrentUser: boolean
   onUserUpdate: (user: User) => void
+  isLoading?: boolean
 }
 
-export function ProfileHeader({ user, isCurrentUser, onUserUpdate }: ProfileHeaderProps) {
+export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = false }: ProfileHeaderProps) {
+  if (isLoading) {
+    return <ProfileHeaderSkeleton />
+  }
+
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [isUploading, setIsUploading] = useState(false)
@@ -36,6 +43,7 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate }: ProfileHead
   // Bio states
   const [isEditingBio, setIsEditingBio] = useState(false)
   const [bioValue, setBioValue] = useState(user.bio || '')
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(
     getImageUrl(user.profilePicUrl)
@@ -252,7 +260,7 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate }: ProfileHead
           {/* Actions */}
           <div className="flex gap-2">
             {isCurrentUser ? (
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => setIsEditDialogOpen(true)}>
                 Edit Profile
               </Button>
             ) : (
@@ -296,6 +304,16 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate }: ProfileHead
         <Stat label="Followers" value={user.followerCount || 0} />
         <Stat label="Following" value={user.followingCount || 0} />
       </div>
+
+      {/* Edit Profile Dialog */}
+      {isCurrentUser && (
+        <EditProfileDialog
+          user={user}
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          onUserUpdate={onUserUpdate}
+        />
+      )}
     </div>
   )
 }
