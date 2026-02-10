@@ -35,7 +35,7 @@ export function ProfileTabs({ user: initialUser, isCurrentUser }: ProfileTabsPro
       setPosts([])
 
       try {
-        const res = await apiService.getFeeds()
+        const res = await apiService.getFeeds(initialUser.id)
 
         if (res.data?.success) {
           setPosts(res.data.data)
