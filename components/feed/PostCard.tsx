@@ -7,11 +7,13 @@ import { Post } from '@/lib/stores/feedStore'
 import { Heart, MessageCircle, Share2 } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
+import { getImageUrl } from '@/lib/utils'
+import { get } from 'http'
 
 interface PostCardProps {
   post: Post
-  onLike: (postId: string) => void
-  onComment: (postId: string) => void
+  onLike: (postId: number, likedByCurrentUser: boolean) => void
+  onComment: (postId: number) => void
   isLoading?: boolean
 }
 
@@ -19,13 +21,13 @@ export function PostCard({ post, onLike, onComment, isLoading = false }: PostCar
   const [showComments, setShowComments] = useState(false)
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden py-0 gap-0">
       {/* Post Header */}
       <div className="p-4 border-b border-border flex items-center justify-between">
-        <Link href={`/profile/${post.id}`} className="flex items-center gap-3">
+        <Link href={`/profile/${post.authorId}`} className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-full bg-primary/50 flex items-center justify-center font-semibold text-sm">
             {post.authorProfilePicture ? (
-              <img src={post.authorProfilePicture || "/placeholder.svg"} alt={post.authorUsername} className="h-10 w-10 rounded-full object-cover" />
+              <img src={getImageUrl(post.authorProfilePicture) || "/placeholder.svg"} alt={post.authorUsername} className="h-10 w-10 rounded-full object-cover" />
             ) : (
               post.authorUsername.charAt(0).toUpperCase()
             )}
@@ -38,12 +40,12 @@ export function PostCard({ post, onLike, onComment, isLoading = false }: PostCar
       </div>
 
       {/* Post Image */}
-      {post.image && (
-        <div className="relative w-full bg-muted aspect-square">
+      {post.imageUrl && (
+        <div className="relative w-full h-[340px] bg-muted flex items-center justify-center overflow-hidden">
           <img
-            src={post.image || "/placeholder.svg"}
+            src={getImageUrl(post.imageUrl) || "/placeholder.svg"}
             alt={post.caption}
-            className="w-full h-full object-cover"
+            className="h-full w-auto object-contain"
           />
         </div>
       )}
@@ -54,11 +56,11 @@ export function PostCard({ post, onLike, onComment, isLoading = false }: PostCar
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => onLike(post.id)}
+            onClick={() => onLike(post.id, post.likedByCurrentUser)}
             disabled={isLoading}
-            className={post.isLiked ? 'text-destructive' : ''}
+            className={post.likedByCurrentUser ? 'text-destructive' : ''}
           >
-            <Heart className={`h-5 w-5 ${post.isLiked ? 'fill-current' : ''}`} />
+            <Heart className={`h-5 w-5 ${post.likedByCurrentUser ? 'fill-current' : ''}`} />
           </Button>
           <Button
             variant="ghost"
@@ -75,7 +77,7 @@ export function PostCard({ post, onLike, onComment, isLoading = false }: PostCar
 
         {/* Likes Count */}
         <div>
-          <p className="text-sm font-semibold text-foreground">{post.likesCount} likes</p>
+          <p className="text-sm font-semibold text-foreground">{post.likeCount} likes</p>
         </div>
 
         {/* Caption */}
@@ -94,11 +96,11 @@ export function PostCard({ post, onLike, onComment, isLoading = false }: PostCar
           className="p-0 h-auto text-xs text-muted-foreground"
           onClick={() => setShowComments(!showComments)}
         >
-          View {post.commentsCount} comments
+          View {post.commentCount} comments
         </Button>
 
         {/* Comments */}
-        {showComments && post.comments.length > 0 && (
+        {/* {showComments && post.comments.length > 0 && (
           <div className="space-y-2 pt-2 border-t border-border">
             {post.comments.slice(-3).map((comment) => {
               try {
@@ -118,7 +120,7 @@ export function PostCard({ post, onLike, onComment, isLoading = false }: PostCar
               }
             })}
           </div>
-        )}
+        )} */}
       </div>
     </Card>
   )
