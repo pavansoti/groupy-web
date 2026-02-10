@@ -10,18 +10,18 @@ export interface Comment {
 }
 
 export interface Post {
-  id: number | string
+  id: number
   authorId: string
   authorUsername: string
   authorProfilePicture?: string
-  imageUrl?: string
+  imageUrl: string
   caption: string
-  likes?: any []
-  likeCount?: number
-  commentsCount: number
+  // likes: any []
+  likeCount: number
+  commentCount: number
   createdAt: string
   likedByCurrentUser: boolean
-  comments: Comment[]
+  // comments: Comment[]
 }
 
 interface FeedState {
@@ -33,10 +33,10 @@ interface FeedState {
   // Actions
   setPosts: (posts: Post[]) => void
   addPosts: (posts: Post[]) => void
-  updatePost: (postId: string, post: Partial<Post>) => void
-  toggleLike: (postId: string) => void
-  addComment: (postId: string, comment: Comment) => void
-  removeComment: (postId: string, commentId: string) => void
+  updatePost: (postId: number, post: Partial<Post>) => void
+  toggleLike: (postId: number) => void
+  addComment: (postId: number, comment: Comment) => void
+  removeComment: (postId: number, commentId: number) => void
   setIsLoading: (loading: boolean) => void
   setHasMore: (hasMore: boolean) => void
   incrementOffset: () => void
@@ -85,8 +85,8 @@ export const useFeedStore = create<FeedState>((set) => ({
         post.id === postId
           ? {
               ...post,
-              comments: [...post.comments, comment],
-              commentsCount: post.commentsCount + 1,
+              // comments: [...post.comments, comment],
+              commentsCount: post.commentCount + 1,
             }
           : post
       ),
@@ -98,8 +98,8 @@ export const useFeedStore = create<FeedState>((set) => ({
         post.id === postId
           ? {
               ...post,
-              comments: post.comments.filter((c) => c.id !== commentId),
-              commentsCount: post.commentsCount - 1,
+              // comments: post.comments.filter((c) => c.id !== commentId),
+              commentsCount: post.commentCount - 1,
             }
           : post
       ),

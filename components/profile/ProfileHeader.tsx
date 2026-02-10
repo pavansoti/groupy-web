@@ -93,7 +93,8 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate }: ProfileHead
       if (res.data?.success) {
         const updatedUser = res.data.data
         // Update parent (ProfilePage)
-        onUserUpdate(updatedUser)
+        user.bio = updatedUser.bio
+        onUserUpdate(user)
 
         // Sync auth store ONLY if current user
         setAuthUser(updatedUser)
@@ -193,11 +194,11 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate }: ProfileHead
           <div className="flex justify-between items-start">
             <h1 className="text-3xl font-bold">{user.username}</h1>
 
-            {isCurrentUser && (
+            {/* {isCurrentUser && (
               <Button variant="ghost" size="icon">
                 <Settings className="h-5 w-5" />
               </Button>
-            )}
+            )} */}
           </div>
 
           {/* BIO SECTION */}

@@ -11,7 +11,7 @@ import { ImageIcon, X } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface CreatePostFormProps {
-  onSubmit: (formData: FormData) => Promise<void>
+  onSubmit: (formData: FormData) => Promise<boolean>
   isLoading?: boolean
 }
 
@@ -61,14 +61,16 @@ export function CreatePostForm({
       formData.append('file', file)
     }
 
-    await onSubmit(formData)
-    toast.success('Post created successfully')
-    reset()
-    clearPreview()
+    const success = await onSubmit(formData)
+  
+    if (success) {
+      reset()
+      clearPreview()
+    }
   }
 
   return (
-    <Card className="p-6 space-y-4">
+    <Card className="p-6 space-y-4 gap-0">
       <h3 className="font-semibold text-foreground">Create a Post</h3>
 
       <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4">

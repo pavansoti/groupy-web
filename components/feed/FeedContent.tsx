@@ -7,23 +7,7 @@ import { CreatePostForm } from './CreatePostForm'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { apiService } from '@/lib/services/api'
-
-const MOCK_POSTS = [
-  {
-    id: '1',
-    authorId: 'user1',
-    authorUsername: 'John Doe',
-    authorProfilePicture: undefined,
-    image: undefined,
-    caption: 'Just launched my new project 🚀',
-    likeCount: 234,
-    commentsCount: 12,
-    createdAt: new Date().toISOString(),
-    likedByCurrentUser: false,
-    comments: [],
-  },
-  { id: '2', authorId: 'user2', authorUsername: 'Jane Smith', authorProfilePicture: undefined, image: undefined, caption: 'Beautiful sunset today at the beach 🌅', likeCount: 456, commentsCount: 28, createdAt: new Date(Date.now() - 3600000).toISOString(), likedByCurrentUser: false, comments: [], }, { id: '3', authorId: 'user3', authorUsername: 'Tech Enthusiast', authorProfilePicture: undefined, image: undefined, caption: 'Learning TypeScript has been a game changer for my development workflow!', likeCount: 189, commentsCount: 45, createdAt: new Date(Date.now() - 7200000).toISOString(), likedByCurrentUser: false, comments: [], },
-]
+import { toast } from 'sonner'
 
 export function FeedContent() {
   const { posts, isLoading, hasMore, incrementOffset, setPosts, toggleLike } =
@@ -32,42 +16,51 @@ export function FeedContent() {
   const [isCreating, setIsCreating] = useState(false)
 
   useEffect(() => {
-    if (posts.length === 0) {
-      const fetchPosts = async () => {
-        try {
-          const response = await apiService.getFeedFollowing();
-          console.log('Fetched posts:', response.data.data)
-          // setPosts(response.data.data)
-          setPosts(MOCK_POSTS)
-        } catch (error) {
-          console.error('Error fetching posts:', error)
-        }
+    const fetchPosts = async () => {
+      try {
+        const response = await apiService.getFeedFollowing();
+        setPosts(response.data.data)
+      } catch (error) {
+        console.error('Error fetching posts:', error)
       }
-      fetchPosts()
-    } else {
-      setPosts(MOCK_POSTS)
     }
+    fetchPosts()
   }, [])
 
   const handleCreatePost = useCallback(async (formData: FormData) => {
     setIsCreating(true)
     try {
-      await apiService.createPost(formData)
-      // Optional: refetch feed or optimistic update
-      console.log('Post created')
+      const res = await apiService.createPost(formData)
+  
+      if (res.data.success) {
+        toast.success('Post created successfully')
+  
+        const response = await apiService.getFeedFollowing()
+        setPosts(response.data.data)
+        return true
+      } else {
+        toast.error('Failed to create post')
+        return false
+      }
+    } catch (error) {
+      console.error('Error creating post:', error)
+      toast.error('Something went wrong')
+      return false
     } finally {
       setIsCreating(false)
     }
   }, [])
 
   const handleLike = useCallback(
-    (postId: string) => {
+    async (postId: number, likedByCurrentUser: boolean) => {
+      const callFunc = likedByCurrentUser ? 'unlikePost' : 'likePost';
+      const response = await apiService[callFunc](postId);
       toggleLike(postId)
     },
     [toggleLike]
   )
 
-  const handleComment = useCallback((postId: string) => {
+  const handleComment = useCallback((postId: number) => {
     console.log('Comment on post:', postId)
   }, [])
 
