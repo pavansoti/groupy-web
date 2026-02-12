@@ -70,12 +70,16 @@ class ApiService {
 
 
   // Auth endpoints
-  async signup(email: string, username: string, password: string) {
-    return this.api.post('/api/auth/signup', { email, username, password })
+  async signup(data: any) {
+    return this.api.post('/api/auth/signup', data)
   }
 
   async signin(email: string, password: string) {
     return this.api.post('/api/auth/login', { email, password })
+  }
+
+  async changePassword(data: any) {
+    return this.api.post('/api/auth/change-password', data)
   }
 
   async refreshToken() {

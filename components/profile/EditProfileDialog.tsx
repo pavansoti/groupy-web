@@ -49,7 +49,6 @@ export function EditProfileDialog({
 }: EditProfileDialogProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { setUser: setAuthUser } = useAuthStore()
-console.log(user);
 
   const {
     register,
@@ -137,7 +136,7 @@ console.log(user);
               id="username"
               placeholder="Enter your username"
               {...register('username')}
-              disabled={isLoading}
+              disabled={true}
             />
             {errors.username && (
               <p className="text-xs text-destructive">{errors.username.message}</p>

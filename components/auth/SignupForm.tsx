@@ -31,11 +31,14 @@ export function SignupForm() {
     setIsLoading(true)
   
     try {
-      const response = await apiService.signup(
-        data.email,
-        data.username,
-        data.password
-      )
+
+      const reqData = {
+        email: data.email.trim(),
+        username: data.username.trim(),
+        password: data.password.trim(),
+      };
+
+      const response = await apiService.signup(reqData)
 
       const { success, message, data: payload } = response.data
 
