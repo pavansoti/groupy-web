@@ -14,6 +14,7 @@ export interface User {
   email: string
   bio: string | null
   role: string
+  gender: string | null
   posts: any[]
   // followers: any[]
   // following: any[]
@@ -21,8 +22,8 @@ export interface User {
   followingCount: number
   postCount: number
   createdAt: string
-  profilePicUrl: string | null
-  Private: boolean
+  privateAccount: boolean
+  imageUrl: string | null
   following: boolean
 }
 

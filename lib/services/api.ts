@@ -87,8 +87,12 @@ class ApiService {
     return this.api.get(`/api/users/${userId}`)
   }
 
-  async updateProfile(userId: string | number, data: any) {
+  async updateUserData(userId: string | number, data: any) {
     return this.api.put(`/api/users/${userId}`, data)
+  }
+
+  async updateUserBio(userId: string | number, data: any) {
+    return this.api.patch(`/api/users/${userId}`, data)
   }
 
   // Profile

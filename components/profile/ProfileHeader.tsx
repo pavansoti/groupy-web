@@ -19,9 +19,6 @@ import { apiService } from '@/lib/services/api'
 import { getImageUrl } from '@/lib/utils'
 import { EditProfileDialog } from './EditProfileDialog'
 import { ProfileHeaderSkeleton } from '@/components/skeletons'
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
-
 interface ProfileHeaderProps {
   user: User
   isCurrentUser: boolean
@@ -46,7 +43,7 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = f
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(
-    getImageUrl(user.profilePicUrl)
+    getImageUrl(user.imageUrl)
   )
 
   const { setUser: setAuthUser } = useAuthStore()
@@ -76,7 +73,7 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = f
       if (res.data?.success) {
         const updatedUser = res.data.data
         setAuthUser(updatedUser)
-        setProfilePicUrl(getImageUrl(updatedUser.profilePicUrl))
+        setProfilePicUrl(getImageUrl(updatedUser.imageUrl))
       }
     } catch (err) {
       console.error('Profile pic upload failed')
@@ -92,11 +89,11 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = f
 
       const payload = {
         bio: bioValue,
-        username: user.username,
-        email: user.email,
+        // username: user.username,
+        // email: user.email,
       }
 
-      const res = await apiService.updateProfile(user.id, payload)
+      const res = await apiService.updateUserBio(user.id, payload)
 
       if (res.data?.success) {
         const updatedUser = res.data.data
