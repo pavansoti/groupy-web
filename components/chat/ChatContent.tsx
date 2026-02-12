@@ -12,19 +12,23 @@ export function ChatContent() {
   const { user } = useAuth()
   const { conversations, activeConversationId, setActiveConversation, messages } = useChatStore()
   const [mounted, setMounted] = useState(false)
+  const [showConversationList, setShowConversationList] = useState(true)
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  const activeConversation = conversations.find((c) => c.id === activeConversationId)
-  const activeMessages = activeConversationId ? messages.get(activeConversationId) || [] : []
+  const activeConversation = conversations.find(
+    (c) => c.id === activeConversationId
+  )
+
+  const activeMessages = activeConversationId
+    ? messages.get(activeConversationId) || []
+    : []
 
   if (!mounted) {
     return null
   }
-
-  const [showConversationList, setShowConversationList] = useState(true)
 
   return (
     <div className="h-[calc(100vh-80px)] flex flex-col md:grid md:grid-cols-3 gap-0 md:gap-4 p-2 sm:p-4 md:p-6 lg:p-8">
@@ -32,16 +36,13 @@ export function ChatContent() {
       <div 
         className={`${
           showConversationList ? 'flex' : 'hidden'
-        } md:flex flex-col md:col-span-1 space-y-3 overflow-y-auto border-r md:border-r border-border`}
+        } md:flex flex-col md:col-span-1 space-y-3 overflow-y-auto border-r border-border`}
       >
         <div className="flex items-center justify-between pb-2">
-          <h2 className="text-lg font-semibold text-foreground">
-            Messages
-          </h2>
+          <h2 className="text-lg font-semibold">Messages</h2>
           <button
             onClick={() => setShowConversationList(false)}
             className="md:hidden text-muted-foreground hover:text-foreground"
-            aria-label="Close conversations"
           >
             ✕
           </button>
@@ -75,7 +76,7 @@ export function ChatContent() {
             <div className="md:hidden mb-2">
               <button
                 onClick={() => setShowConversationList(true)}
-                className="text-sm font-semibold text-muted-foreground hover:text-foreground flex items-center gap-2"
+                className="text-sm font-semibold text-muted-foreground hover:text-foreground"
               >
                 ← Back to conversations
               </button>
@@ -83,21 +84,19 @@ export function ChatContent() {
             <ChatWindow
               conversation={activeConversation}
               messages={activeMessages}
-              onSendMessage={(message) => {
+              onSendMessage={(message) =>
                 socketService.sendMessage(activeConversation.id, message)
-              }}
-              onTyping={(isTyping) => {
+              }
+              onTyping={(isTyping) =>
                 socketService.setTyping(activeConversation.id, isTyping)
-              }}
+              }
             />
           </>
         ) : (
           <Card className="flex items-center justify-center h-full">
-            <div className="text-center px-4">
-              <p className="text-muted-foreground text-sm">
-                {showConversationList ? 'Select a conversation' : 'Select a conversation to start chatting'}
-              </p>
-            </div>
+            <p className="text-muted-foreground text-sm">
+              Select a conversation to start chatting
+            </p>
           </Card>
         )}
       </div>

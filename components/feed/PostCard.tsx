@@ -20,6 +20,8 @@ interface PostCardProps {
 export function PostCard({ post, onLike, onComment, isLoading = false }: PostCardProps) {
   const [showComments, setShowComments] = useState(false)
 
+  const hasImage = !!post.imageUrl
+
   return (
     <Card className="overflow-hidden py-0 gap-0">
       {/* Post Header */}
@@ -40,7 +42,7 @@ export function PostCard({ post, onLike, onComment, isLoading = false }: PostCar
       </div>
 
       {/* Post Image */}
-      {post.imageUrl && (
+      {hasImage && (
         <div className="relative w-full h-[340px] bg-muted flex items-center justify-center overflow-hidden">
           <img
             src={getImageUrl(post.imageUrl) || "/placeholder.svg"}
@@ -50,8 +52,23 @@ export function PostCard({ post, onLike, onComment, isLoading = false }: PostCar
         </div>
       )}
 
+      {/* Caption (no image → show above actions) */}
+      {!hasImage && (
+        <div className="px-4 pt-3">
+          <p className="text-sm text-foreground">
+            <Link
+              href={`/profile/${post.authorId}`}
+              className="font-semibold hover:underline"
+            >
+              {post.authorUsername}
+            </Link>{' '}
+            {post.caption}
+          </p>
+        </div>
+      )}
+
       {/* Post Actions */}
-      <div className="p-4 space-y-3">
+      <div className="py-4 px-2 space-y-3">
         <div className="flex gap-2">
           <Button
             variant="ghost"
@@ -77,27 +94,30 @@ export function PostCard({ post, onLike, onComment, isLoading = false }: PostCar
 
         {/* Likes Count */}
         <div>
-          <p className="text-sm font-semibold text-foreground">{post.likeCount} likes</p>
+          <p className="px-2 text-sm font-semibold text-foreground">{post.likeCount} likes</p>
         </div>
 
-        {/* Caption */}
-        <div>
-          <p className="text-sm text-foreground">
-            <Link href={`/profile/${post.authorId}`} className="font-semibold hover:underline">
-              {post.authorUsername}
-            </Link>{' '}
-            {post.caption}
-          </p>
-        </div>
+        {/* Caption (image → show below actions) */}
+        {hasImage && (
+          <div>
+            <p className="px-2 text-sm text-foreground">
+              <Link
+                href={`/profile/${post.authorId}`}
+                className="font-semibold hover:underline"
+              >
+                {post.authorUsername}
+              </Link>{' '}
+              {post.caption}
+            </p>
+          </div>
+        )}
 
         {/* Comments Count */}
-        <Button
-          variant="link"
-          className="p-0 h-auto text-xs text-muted-foreground"
-          onClick={() => setShowComments(!showComments)}
-        >
-          View {post.commentCount} comments
-        </Button>
+        {post.commentCount > 0 && (
+          <Button variant="link" className="p-0 h-auto text-xs text-muted-foreground">
+            View {post.commentCount} comments
+          </Button>
+        )}
 
         {/* Comments */}
         {/* {showComments && post.comments.length > 0 && (

@@ -13,7 +13,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     <>
       <Navbar />
 
-      <div className="flex pb-20 md:pb-0">
+      <div className="flex pb-10 md:pb-0">
         <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
         <main

@@ -299,7 +299,7 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = f
       </div>
 
       {/* Stats */}
-      <div className="flex gap-8 border-t pt-4">
+      <div className="flex justify-evenly sm:justify-start gap-8 border-t pt-4">
         <Stat label="Posts" value={user.postCount || 0} />
         <Stat label="Followers" value={user.followerCount || 0} />
         <Stat label="Following" value={user.followingCount || 0} />
@@ -322,7 +322,7 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = f
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div>
+    <div className='text-center'>
       <p className="text-lg font-bold">{value}</p>
       <p className="text-xs text-muted-foreground">{label}</p>
     </div>
