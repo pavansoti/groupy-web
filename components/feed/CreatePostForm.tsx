@@ -70,7 +70,7 @@ export function CreatePostForm({
   }
 
   return (
-    <Card className="p-6 space-y-4 gap-0">
+    <Card className="p-3 sm:p-4 md:p-6 space-y-4 gap-0">
       <h3 className="font-semibold text-foreground">Create a Post</h3>
 
       <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4">
