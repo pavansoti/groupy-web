@@ -31,9 +31,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Define public paths that don't require authentication
     const isAuthPage = pathname.startsWith('/auth')
+    const isResetPasswordPage = pathname.startsWith('/auth/reset-password')
     const isPublicAsset = pathname.startsWith('/_next') || 
                          pathname.startsWith('/api') || 
                          pathname.includes('.')
+
+    // Reset password page doesn't require authentication
+    if (isResetPasswordPage) {
+      setIsChecking(false)
+      return
+    }
 
     // If the user is on an auth page and has a token, redirect to feed
     if (isAuthPage && token) {
