@@ -17,16 +17,17 @@ import {
   AlertDialogFooter,
 } from '@/components/ui/alert-dialog'
 import { Eye, EyeOff } from 'lucide-react'
+import { apiService } from '@/lib/services/api'
 
 const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, 'Current password is required'),
     newPassword: z.string().min(8, 'Password must be at least 8 characters'),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
+    confirmNewPassword: z.string().min(1, 'Please confirm your password'),
   })
-  .refine((data) => data.newPassword === data.confirmPassword, {
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
     message: "Passwords don't match",
-    path: ['confirmPassword'],
+    path: ['confirmNewPassword'],
   })
   .refine((data) => data.currentPassword !== data.newPassword, {
     message: 'New password must be different from current password',
@@ -61,11 +62,8 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
     setIsLoading(true)
 
     try {
-      // TODO: Call your backend API endpoint to change password
-      // Example: const response = await apiService.changePassword(data.currentPassword, data.newPassword)
-      
-      // For now, we'll simulate the API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      await apiService.changePassword(data)
       
       toast.success('Password changed successfully!')
       reset()
@@ -156,13 +154,13 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm New Password</Label>
+            <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
             <div className="relative">
               <Input
-                id="confirmPassword"
+                id="confirmNewPassword"
                 type={showPasswords.confirm ? 'text' : 'password'}
                 placeholder="••••••••"
-                {...register('confirmPassword')}
+                {...register('confirmNewPassword')}
                 disabled={isLoading}
               />
               <button
@@ -178,9 +176,9 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
                 )}
               </button>
             </div>
-            {errors.confirmPassword && (
+            {errors.confirmNewPassword && (
               <p className="text-sm text-destructive">
-                {errors.confirmPassword.message}
+                {errors.confirmNewPassword.message}
               </p>
             )}
           </div>

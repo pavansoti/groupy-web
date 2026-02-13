@@ -28,8 +28,8 @@ const editProfileSchema = z.object({
     .regex(/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, underscores, and hyphens'),
   email: z.string().email('Invalid email address'),
   bio: z.string().max(500, 'Bio must not exceed 500 characters').optional(),
-  gender: z.enum(['male', 'female', 'other', 'prefer-not-to-say', '']).optional(),
-  isPrivate: z.boolean(),
+  gender: z.enum(['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY', '']).optional(),
+  privateAccount: z.boolean(),
 })
 
 type EditProfileFormData = z.infer<typeof editProfileSchema>
@@ -63,7 +63,7 @@ export function EditProfileDialog({
       email: user.email,
       bio: user.bio || '',
       gender: (user as any).gender || '',
-      isPrivate: user.Private || false,
+      privateAccount: user.privateAccount || false,
     },
   })
 
@@ -73,11 +73,11 @@ export function EditProfileDialog({
       email: user.email,
       bio: user.bio || '',
       gender: (user as any).gender || '',
-      isPrivate: user.Private || false,
+      privateAccount: user.privateAccount || false,
     })
   }, [user, open, reset])
 
-  const isPrivateWatch = watch('isPrivate')
+  const isPrivateWatch = watch('privateAccount')
 
   const onSubmit = async (data: EditProfileFormData) => {
     try {
@@ -88,10 +88,10 @@ export function EditProfileDialog({
         email: data.email,
         bio: data.bio || '',
         gender: data.gender || '',
-        Private: data.isPrivate,
+        privateAccount: data.privateAccount,
       }
 
-      const response = await apiService.updateProfile(user.id, payload)
+      const response = await apiService.updateUserData(user.id, payload)
 
       if (response.data?.success) {
         const updatedUser = response.data.data
@@ -136,7 +136,7 @@ export function EditProfileDialog({
               id="username"
               placeholder="Enter your username"
               {...register('username')}
-              disabled={isLoading}
+              disabled={true}
             />
             {errors.username && (
               <p className="text-xs text-destructive">{errors.username.message}</p>
@@ -184,10 +184,10 @@ export function EditProfileDialog({
               {...register('gender')}
             >
               <option value="">Select your gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-              <option value="prefer-not-to-say">Prefer not to say</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+              <option value="OTHER">Other</option>
+              <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
             </select>
             {errors.gender && (
               <p className="text-xs text-destructive">{errors.gender.message}</p>
@@ -201,7 +201,7 @@ export function EditProfileDialog({
               type="checkbox"
               className="h-4 w-4 rounded border-border cursor-pointer"
               disabled={isLoading}
-              {...register('isPrivate')}
+              {...register('privateAccount')}
             />
             <div className="flex-1">
               <Label htmlFor="isPrivate" className="cursor-pointer font-medium">
