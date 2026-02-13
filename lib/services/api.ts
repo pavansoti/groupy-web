@@ -82,6 +82,14 @@ class ApiService {
     return this.api.post('/api/auth/change-password', data)
   }
 
+  async forgotPassword(email: string) {
+    return this.api.get('/api/auth/forgot-password?email=' + email)
+  }
+
+  async resetPassword(data: any) {
+    return this.api.post('/api/auth/reset-password', data)
+  }
+
   async refreshToken() {
     return this.api.post('/auth/refresh')
   }

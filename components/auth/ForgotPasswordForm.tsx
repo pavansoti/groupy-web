@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 import Link from 'next/link'
 import { z } from 'zod'
 import { ArrowLeft } from 'lucide-react'
+import { apiService } from '@/lib/services/api'
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -39,19 +40,16 @@ export function ForgotPasswordForm() {
     setIsLoading(true)
 
     try {
-      // TODO: Call your backend API endpoint for password reset
-      // Example: const response = await apiService.forgotPassword(data.email)
       
-      // For now, we'll simulate the API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await apiService.forgotPassword(data.email)
       
       setSubmitted(true)
       toast.success('Password reset email sent! Check your inbox.')
       
       // Optionally redirect after a delay
-      setTimeout(() => {
-        router.push('/auth/signin')
-      }, 3000)
+      // setTimeout(() => {
+      //   router.push('/auth/signin')
+      // }, 3000)
     } catch (error: any) {
       toast.error(
         error.response?.data?.message || 'Failed to send reset email'
