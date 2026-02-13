@@ -86,6 +86,12 @@ class ApiService {
     return this.api.get('/api/auth/forgot-password?email=' + email)
   }
 
+  /**
+   * Reset password endpoint
+   * @param data - Can be either:
+   *   - { token } - Validates if the reset token is valid
+   *   - { token, password } - Performs the password reset with the new password
+   */
   async resetPassword(data: any) {
     return this.api.post('/api/auth/reset-password', data)
   }
