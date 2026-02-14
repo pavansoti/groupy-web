@@ -18,8 +18,8 @@ export function ResetPasswordForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(false)
-  const [isValidatingToken, setIsValidatingToken] = useState(true)
-  const [tokenValid, setTokenValid] = useState(false)
+  // const [isValidatingToken, setIsValidatingToken] = useState(true)
+  // const [tokenValid, setTokenValid] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
   const token = searchParams.get('token')
@@ -41,16 +41,16 @@ export function ResetPasswordForm() {
         return
       }
 
-      try {
-        await apiService.resetPassword({ token })
-        setTokenValid(true)
-      } catch (error: any) {
-        toast.error(error.response?.data?.message || 'Invalid or expired reset token')
-        setTokenValid(false)
-        setTimeout(() => router.push('/auth/signin'), 2000)
-      } finally {
-        setIsValidatingToken(false)
-      }
+      // try {
+      //   await apiService.resetPassword({ token })
+      //   setTokenValid(true)
+      // } catch (error: any) {
+      //   toast.error(error.response?.data?.message || 'Invalid or expired reset token')
+      //   setTokenValid(false)
+      //   setTimeout(() => router.push('/auth/signin'), 2000)
+      // } finally {
+      //   setIsValidatingToken(false)
+      // }
     }
 
     validateToken()
@@ -67,7 +67,8 @@ export function ResetPasswordForm() {
     try {
       await apiService.resetPassword({
         token,
-        password: data.password,
+        newPassword: data.password,
+        confirmPassword: data.confirmPassword,
       })
 
       setSubmitted(true)
@@ -85,39 +86,39 @@ export function ResetPasswordForm() {
     }
   }
 
-  if (isValidatingToken) {
-    return (
-      <Card className="w-full max-w-sm mx-auto bg-background/70 backdrop-blur-xl border border-border/60 shadow-xl rounded-2xl">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl">Verifying Reset Link</CardTitle>
-        </CardHeader>
-        <CardContent className="flex justify-center py-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </CardContent>
-      </Card>
-    )
-  }
+  // if (isValidatingToken) {
+  //   return (
+  //     <Card className="w-full max-w-sm mx-auto bg-background/70 backdrop-blur-xl border border-border/60 shadow-xl rounded-2xl">
+  //       <CardHeader className="space-y-1 text-center">
+  //         <CardTitle className="text-2xl">Verifying Reset Link</CardTitle>
+  //       </CardHeader>
+  //       <CardContent className="flex justify-center py-8">
+  //         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  //       </CardContent>
+  //     </Card>
+  //   )
+  // }
 
-  if (!tokenValid) {
-    return (
-      <Card className="w-full max-w-sm mx-auto bg-background/70 backdrop-blur-xl border border-border/60 shadow-xl rounded-2xl">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl">Invalid Reset Link</CardTitle>
-          <CardDescription>
-            Your password reset link is invalid or has expired
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button
-            onClick={() => router.push('/auth/signin')}
-            className="w-full"
-          >
-            Back to Sign In
-          </Button>
-        </CardContent>
-      </Card>
-    )
-  }
+  // if (!tokenValid) {
+  //   return (
+  //     <Card className="w-full max-w-sm mx-auto bg-background/70 backdrop-blur-xl border border-border/60 shadow-xl rounded-2xl">
+  //       <CardHeader className="space-y-1 text-center">
+  //         <CardTitle className="text-2xl">Invalid Reset Link</CardTitle>
+  //         <CardDescription>
+  //           Your password reset link is invalid or has expired
+  //         </CardDescription>
+  //       </CardHeader>
+  //       <CardContent>
+  //         <Button
+  //           onClick={() => router.push('/auth/signin')}
+  //           className="w-full"
+  //         >
+  //           Back to Sign In
+  //         </Button>
+  //       </CardContent>
+  //     </Card>
+  //   )
+  // }
 
   if (submitted) {
     return (
@@ -155,7 +156,7 @@ export function ResetPasswordForm() {
       <CardHeader className="space-y-1">
         <div className="flex items-center gap-2 mb-2">
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push('/auth/signin')}
             className="p-1.5 hover:bg-muted rounded-lg transition-colors"
             aria-label="Go back"
           >

@@ -23,24 +23,25 @@ import { getCookie } from '@/lib/utils/cookie'
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
-  const [isChecking, setIsChecking] = useState(true)
+  // const [isChecking, setIsChecking] = useState(true)
 
   useEffect(() => {
     // Get token from cookies using utility function
-    const token = getCookie('token')
+    // const token = getCookie('token')
+    const token = sessionStorage.getItem('token')
 
     // Define public paths that don't require authentication
     const isAuthPage = pathname.startsWith('/auth')
-    const isResetPasswordPage = pathname.startsWith('/auth/reset-password')
+    // const isResetPasswordPage = pathname.startsWith('/auth/reset-password')
     const isPublicAsset = pathname.startsWith('/_next') || 
                          pathname.startsWith('/api') || 
                          pathname.includes('.')
 
     // Reset password page doesn't require authentication
-    if (isResetPasswordPage) {
-      setIsChecking(false)
-      return
-    }
+    // if (isResetPasswordPage) {
+    //   setIsChecking(false)
+    //   return
+    // }
 
     // If the user is on an auth page and has a token, redirect to feed
     if (isAuthPage && token) {
@@ -54,13 +55,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
-    setIsChecking(false)
+    // setIsChecking(false)
   }, [pathname, router])
 
   // Optionally show loading state while checking auth
-  if (isChecking) {
-    return null
-  }
+  // if (isChecking) {
+  //   return null
+  // }
 
   return <>{children}</>
 }
