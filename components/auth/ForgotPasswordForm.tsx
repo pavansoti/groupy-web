@@ -44,12 +44,12 @@ export function ForgotPasswordForm() {
       await apiService.forgotPassword(data.email)
       
       setSubmitted(true)
-      toast.success('Password reset email sent! Check your inbox.')
+      toast.success('Password reset email sent! Check your inbox or spam folder.')
       
       // Optionally redirect after a delay
-      // setTimeout(() => {
-      //   router.push('/auth/signin')
-      // }, 3000)
+      setTimeout(() => {
+        router.push('/auth/signin')
+      }, 5000)
     } catch (error: any) {
       toast.error(
         error.response?.data?.message || 'Failed to send reset email'
