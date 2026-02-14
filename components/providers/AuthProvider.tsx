@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { getCookie } from '@/lib/utils/cookie'
 
+const TOKEN_KEY = process.env.NEXT_PUBLIC_AUTH_TOKEN_KEY || 'auth_token'
 /**
  * AuthProvider - Handles client-side authentication logic
  * 
@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Get token from cookies using utility function
     // const token = getCookie('token')
-    const token = sessionStorage.getItem('token')
+    const token = sessionStorage.getItem(TOKEN_KEY)
 
     // Define public paths that don't require authentication
     const isAuthPage = pathname.startsWith('/auth')
