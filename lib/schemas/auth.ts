@@ -29,17 +29,6 @@ export const updateProfileSchema = z.object({
   bio: z.string().max(150, 'Bio must be at most 150 characters').optional(),
 })
 
-export const resetPasswordSchema = z
-  .object({
-    password: z.string().min(8, 'Password must be at least 8 characters'),
-    confirmPassword: z.string().min(8, 'Password must be at least 8 characters'),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  })
-
 export type SignupFormData = z.infer<typeof signupSchema>
 export type SigninFormData = z.infer<typeof signinSchema>
 export type UpdateProfileFormData = z.infer<typeof updateProfileSchema>
-export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>
