@@ -31,9 +31,9 @@ class ApiService {
       (response) => response,
       (error: AxiosError) => {
         if (error.response?.status === 401) {
-          if (typeof document !== 'undefined') {
-            document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
-          }
+          // if (typeof document !== 'undefined') {
+          //   document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+          // }
           this.clearToken()
 
           if (typeof window !== 'undefined') {

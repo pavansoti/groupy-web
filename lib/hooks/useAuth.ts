@@ -16,7 +16,7 @@ export function useAuth() {
 
   const logout = useCallback(() => {
     // Clear the token cookie
-    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+    // document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
     
     storeLogout()
     router.push('/auth/signin')
