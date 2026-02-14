@@ -77,8 +77,8 @@ export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }:
   return (
     <div className="w-full border-t border-border">
       {/* Tab Navigation */}
-      <div className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b border-border">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+      <div className="sticky top-0 backdrop-blur z-10 border-b border-border">
+        <div className="max-w-4xl mx-auto">
           <div className="flex justify-between sm:justify-start items-center">
             {visibleTabs.map((tab) => (
               <button
