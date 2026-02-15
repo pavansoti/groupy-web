@@ -76,6 +76,7 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = f
         setProfilePicUrl(getImageUrl(updatedUser.imageUrl))
       }
     } catch (err) {
+      toast.error('Failed to update profile picture', err?.response?.data?.message)
       console.error('Profile pic upload failed')
     } finally {
       setIsUploading(false)

@@ -132,8 +132,8 @@ export function FeedContent({ feedsType = "all" }) {
       fetchPosts(0, false)
 
       return true
-    } catch {
-      toast.error('Something went wrong')
+    } catch (err) {
+      toast.error('Something went wrong', err?.response?.data?.message)
       return false
     } finally {
       setIsCreating(false)
