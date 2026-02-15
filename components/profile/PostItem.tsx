@@ -18,16 +18,16 @@ import {
   AlertDialogAction,
 } from '@/components/ui/alert-dialog'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
-
 interface PostItemProps {
+  activeTab: string
   post: Post
-  isCurrentUserProfile: boolean
+  // isCurrentUserProfile: boolean
   onDelete: (postId: string | number) => void
   onUnlike?: (postId: string | number) => void
+  onUnsaved?: (postId: string | number) => void  
 }
 
-export function PostItem({ post, isCurrentUserProfile, onDelete, onUnlike }: PostItemProps) {
+export function PostItem({ activeTab, post, onDelete, onUnlike, onUnsaved }: PostItemProps) {
   const imageSrc = getImageUrl(post.imageUrl)
 
   const [liked, setLiked] = useState(post.likedByCurrentUser ?? false)
@@ -50,8 +50,10 @@ export function PostItem({ post, isCurrentUserProfile, onDelete, onUnlike }: Pos
       } else {
         await apiService.unlikePost(post.id)
         // Call onUnlike callback if provided (for removing from liked posts grid)
-        if (onUnlike) {
+        if (activeTab === 'liked') {
           onUnlike(post.id)
+        } else if (activeTab === 'saved') {
+          onUnsaved(post.id)
         }
       }
     } catch {
@@ -103,7 +105,7 @@ export function PostItem({ post, isCurrentUserProfile, onDelete, onUnlike }: Pos
         </button>
 
         {/* DELETE (self profile only) */}
-        {isCurrentUserProfile && (
+        {activeTab === 'posts' && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <button

@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { User } from '@/app/(main)/profile/[[...id]]/page'
 import { Heart, Bookmark, Image as ImageIcon } from 'lucide-react'
 import { Post } from '@/lib/stores/feedStore'
 import { PostItem } from './PostItem'
 import { apiService } from '@/lib/services/api'
 import { PostGridSkeleton } from '@/components/skeletons'
+import { LIMIT } from '@/lib/constants'
 
 interface ProfileTabsProps {
   user: User
@@ -29,27 +30,137 @@ export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }:
   const [posts, setPosts] = useState<Post[]>([])  
   const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
+  // const [page, setPage] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
+  const [isFetchingMore, setIsFetchingMore] = useState(false)
 
-    const fetchUser = async () => {
-      
-      setIsLoading(true)
-      setPosts([])
+  const observerRef = useRef<HTMLDivElement | null>(null)
+  const fetchingRef = useRef(false)
+  const pageRef = useRef(0)
 
+  const fetchData = useCallback(
+    async (nextPage: number, isLoadMore = false) => {
+      debugger
+      if (fetchingRef.current) return
+  
+      fetchingRef.current = true
+  
       try {
-        const res = await apiService.getFeeds(initialUser.id)
-
-        if (res.data?.success) {
-          setPosts(res.data.data)
+        if (isLoadMore) {
+          setIsFetchingMore(true)
+        } else {
+          setIsLoading(true)
+        }
+  
+        let res = null
+  
+        if (activeTab === 'posts') {
+          res = await apiService.getFeeds(initialUser.id, LIMIT, nextPage)
+        } else if (activeTab === 'liked') {
+          res = await apiService.getLikedPosts(LIMIT, nextPage)
+        }
+  
+        if (res?.data?.success) {
+          const data = res.data.data
+  
+          setHasMore(data.hasMore)
+  
+          if (isLoadMore) {
+            setPosts(prev => {
+              const existingIds = new Set(prev.map(p => p.id))
+              const filtered = data.content.filter(
+                (p: Post) => !existingIds.has(p.id)
+              )
+              return [...prev, ...filtered]
+            })
+          } else {
+            setPosts(data.content)
+          }
+  
+          // setPage(nextPage)
         }
       } catch (err) {
-        console.error('Profile pic upload failed')
+        console.error('Pagination fetch failed', err)
       } finally {
         setIsLoading(false)
+        setIsFetchingMore(false)
+        fetchingRef.current = false
       }
-    }
-    fetchUser()
+    },
+    [activeTab, initialUser.id, hasMore]
+  )
+
+  useEffect(() => {
+    setPosts([])
+    pageRef.current = 0
+    setHasMore(true)
+  
+    fetchData(0, false)
   }, [activeTab])
+
+  useEffect(() => {
+    debugger
+    const observer = new IntersectionObserver(
+      entries => {
+        const entry = entries[0]
+  
+        if (
+          entry.isIntersecting &&
+          !isLoading &&
+          !isFetchingMore &&
+          hasMore
+        ) {
+          const nextPage = pageRef.current + 1
+          pageRef.current = nextPage
+          fetchData(nextPage, true)
+        }
+      },
+      {
+        root: null,
+        rootMargin: '50px',
+        threshold: 0,
+      }
+    )
+  
+    const current = observerRef.current
+    if (current) observer.observe(current)
+  
+    return () => {
+      if (current) observer.unobserve(current)
+      observer.disconnect()
+    }
+  }, [fetchData, hasMore, isLoading, isFetchingMore])
+
+  // useEffect(() => {
+
+  //   const fetchUser = async () => {
+      
+  //     setIsLoading(true)
+  //     setPosts([])
+
+  //     try {
+        
+  //       let res = null;
+  //       if(activeTab === 'posts') {
+  //         res = await apiService.getFeeds(initialUser.id)
+  //       } else if (activeTab === 'liked') {
+  //         res = await apiService.getLikedPosts(100, 0)
+  //       } else {
+  //         // 
+  //       }
+
+  //       if (res?.data?.success) {
+  //         setPosts(res.data.data)
+  //       }
+
+  //     } catch (err) {
+  //       console.error('Profile pic upload failed')
+  //     } finally {
+  //       setIsLoading(false)
+  //     }
+  //   }
+  //   fetchUser()
+  // }, [activeTab])
 
   const tabs: Tab[] = [
     {
@@ -79,7 +190,7 @@ export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }:
       {/* Tab Navigation */}
       <div className="sticky top-0 backdrop-blur z-10 border-b border-border">
         <div className="max-w-4xl mx-auto">
-          <div className="flex justify-between sm:justify-start items-center">
+          <div className="flex justify-evenly sm:justify-start items-center">
             {visibleTabs.map((tab) => (
               <button
                 key={tab.id}
@@ -100,156 +211,107 @@ export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }:
 
       {/* Tab Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        {activeTab === 'posts' && (
+        {/* {activeTab === 'posts' && ( */}
           <PostsGrid
+            activeTab={activeTab}
             posts={posts}
-            isCurrentUserProfile={isCurrentUser}
+            // isCurrentUserProfile={isCurrentUser}
             setPosts={setPosts}
             isLoading={isLoading}
+            isFetchingMore={isFetchingMore}
+            hasMore={hasMore}
+            observerRef={observerRef}
             onPostDeleted={onPostDeleted}
           />
-        )}
+        {/* )} */}
 
-        {activeTab === 'liked' && isCurrentUser && <LikedPostsGrid isLoading={isLoading}/>}
+        {/* {activeTab === 'liked' && isCurrentUser && <LikedPostsGrid isLoading={isLoading}/>}
 
-        {activeTab === 'saved' && isCurrentUser && <SavedPostsGrid isLoading={isLoading}/>}
+        {activeTab === 'saved' && isCurrentUser && <SavedPostsGrid isLoading={isLoading}/>} */}
       </div>
     </div>
   )
 }
 
 function PostsGrid({
+  activeTab,
   posts,
-  isCurrentUserProfile,
+  // isCurrentUserProfile,
   setPosts,
   isLoading,
+  isFetchingMore,
+  hasMore,
+  observerRef,
   onPostDeleted
 }: {
+  activeTab: string
   posts: Post[]
-  isCurrentUserProfile: boolean
+  // isCurrentUserProfile: boolean
   setPosts: React.Dispatch<React.SetStateAction<Post[]>>
   isLoading: boolean
+  isFetchingMore: boolean
+  hasMore: boolean
+  observerRef: React.RefObject<HTMLDivElement>
   onPostDeleted: () => void
 }) {
 
   if (isLoading) {
-    return <PostGridSkeleton />
+    return <PostGridSkeleton className='py-6'/>
   }
 
   if (!posts || posts.length === 0) {
-    return <EmptyState message="No posts yet" />
+
+    const msg = {
+      posts: 'No posts yet',
+      liked: 'No liked posts yet',
+      saved: 'No saved posts yet'
+    }
+
+    return <EmptyState message={msg[activeTab]} />
   }
 
   const handleDeleteFromUI = (postId: number) => {
 
     onPostDeleted()
-    console.log('Deleting post with ID:', postId)
-    setPosts((prev) => prev.filter((p) => p.id !== postId))
-  }
-
-  return (
-    <div className="grid grid-cols-3 gap-1 sm:gap-2 py-6">
-      {posts.map((post) => (
-        <PostItem
-          key={post.id}
-          post={post}
-          isCurrentUserProfile={isCurrentUserProfile}
-          onDelete={handleDeleteFromUI}
-        />
-      ))}
-    </div>
-  )
-}
-
-function LikedPostsGrid({ isLoading }: { isLoading: boolean }){
-  const [likedPosts, setLikedPosts] = useState<Post[]>([])
-  const [gridLoading, setGridLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const fetchLikedPosts = async () => {
-      setGridLoading(true)
-      setError(null)
-      
-      try {
-        const res = await apiService.getLikedPosts(100, 0)
-        
-        if (res.data?.success && res.data?.data) {
-          setLikedPosts(res.data.data)
-        }
-      } catch (err) {
-        console.error('Failed to fetch liked posts:', err)
-        setError('Failed to load liked posts')
-      } finally {
-        setGridLoading(false)
-      }
-    }
-
-    fetchLikedPosts()
-  }, [])
-
-  if (isLoading || gridLoading) {
-    return <PostGridSkeleton />
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <p className="text-destructive text-sm mb-2">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="text-xs text-muted-foreground hover:text-foreground underline"
-          >
-            Try again
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  if (likedPosts.length === 0) {
-    return <EmptyState message="No liked posts" />
+    removePost(postId)
   }
 
   const handleUnlike = (postId: string | number) => {
     // Remove post from liked posts when unliked
-    setLikedPosts((prev) => prev.filter((p) => p.id !== postId))
+    removePost(postId)
+  }
+
+  const handleUnSaved = (postId: string | number) => {
+    // Remove post from saved posts when unsaved
+    removePost(postId)
+  }
+
+  const removePost = (postId: string | number) => {
+    setPosts((prev) => prev.filter((p) => p.id !== postId))
   }
 
   return (
-    <div className="grid grid-cols-3 gap-1 sm:gap-2 py-6">
-      {likedPosts.map((post) => (
-        <PostItem
-          key={post.id}
-          post={post}
-          isCurrentUserProfile={false}
-          onDelete={() => {
-            // Remove post from liked posts if deleted
-            setLikedPosts((prev) => prev.filter((p) => p.id !== post.id))
-          }}
-          onUnlike={handleUnlike}
-        />
-      ))}
-    </div>
-  )
-}
+    <div className='py-6'>
+      <div className="grid grid-cols-3 gap-1 sm:gap-2">
+        {posts.map((post) => (
+          <PostItem
+            key={post.id}
+            activeTab={activeTab}
+            post={post}
+            onDelete={handleDeleteFromUI}
+            onUnlike={handleUnlike}
+            onUnsaved={handleUnSaved}
+          />
+        ))}
+      </div>
 
-function SavedPostsGrid({ isLoading }: { isLoading: boolean }) {
-
-  if (isLoading) {
-    return <PostGridSkeleton />
-  }
-
-  const hasNoSavedPosts = true // TODO: Replace with actual data check
-
-  if (hasNoSavedPosts) {
-    return <EmptyState message="No saved posts" />
-  }
-
-  return (
-    <div className="grid grid-cols-3 gap-1 sm:gap-2 py-6">
-      {/* TODO: Fetch and display saved posts */}
+      {hasMore && (
+        <div
+          ref={observerRef}
+        >
+          {isFetchingMore && <PostGridSkeleton length={3} className="py-2" />}
+        </div>
+      )}
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosInstance } from 'axios'
+import { LIMIT } from '@/lib/constants'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
 const TOKEN_KEY = process.env.NEXT_PUBLIC_AUTH_TOKEN_KEY || 'auth_token'
@@ -176,16 +177,16 @@ class ApiService {
   }
 
   // Feed endpoints
-  async getFeedFollowing(limit: number = 100, offset: number = 0) {
-    return this.api.get('/api/posts/feed/following', { params: { limit, offset } })
+  async getFeedFollowing(onlyLiked: boolean = false, page: number = 0,  limit: number = LIMIT) {
+    return this.api.get('/api/posts/feed/following', { params: { onlyLiked, limit, page } })
   }
 
-  async getFeeds(userId: string | number, limit: number = 100, offset: number = 0) {
-    return this.api.get(`/api/posts/feeds/${userId}`, { params: { limit, offset } })
+  async getFeeds(userId: string | number, limit: number = LIMIT, page: number = 0) {
+    return this.api.get(`/api/posts/feeds/${userId}`, { params: { limit, page } })
   }
 
-  async getLikedPosts(limit: number = 100, offset: number = 0) {
-    return this.api.get('/api/posts/feeds/liked', { params: { limit, offset } })
+  async getLikedPosts(limit: number = LIMIT, page: number = 0) {
+    return this.api.get('/api/posts/feeds/liked', { params: { limit, page } })
   }
 
   //---------

@@ -7,7 +7,7 @@ interface SearchResult {
   id: string
   username: string
   bio: string
-  profilePicUrl: string
+  imageUrl: string
   followerCount: number
   following: boolean
 }

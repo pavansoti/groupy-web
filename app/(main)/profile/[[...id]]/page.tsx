@@ -122,7 +122,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen w-full">
+    <div className="w-full">
       {/* Profile Header Section */}
       <div className="border-b border-border">
         <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
