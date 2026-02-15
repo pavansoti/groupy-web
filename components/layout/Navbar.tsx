@@ -23,6 +23,7 @@ function NavbarContent() {
 
   const handleLogout = () => {
     sessionStorage.clear()
+    localStorage.clear()
     logout()
   }
 

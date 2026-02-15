@@ -1,5 +1,6 @@
 'use client'
 
+import { FeedContent } from '@/components/feed/FeedContent'
 import { Card } from '@/components/ui/card'
 import { Heart } from 'lucide-react'
 
@@ -13,14 +14,8 @@ export default function LikesPage() {
         </h1>
         <p className="text-muted-foreground">Posts you've liked</p>
       </div>
-
-      <Card className="p-12 text-center">
-        <Heart className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-        <p className="text-muted-foreground mb-4">You haven't liked any posts yet</p>
-        <p className="text-sm text-muted-foreground">
-          Start liking posts from the feed to see them here
-        </p>
-      </Card>
+      
+      <FeedContent feedsType="liked" />
     </div>
   )
 }

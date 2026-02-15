@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { LIMIT } from '@/lib/constants'
 
 export interface Comment {
   id: string
@@ -33,10 +34,11 @@ interface FeedState {
   // Actions
   setPosts: (posts: Post[]) => void
   addPosts: (posts: Post[]) => void
-  updatePost: (postId: number, post: Partial<Post>) => void
+  removePost: (postId: number) => void
+  // updatePost: (postId: number, post: Partial<Post>) => void
   toggleLike: (postId: number) => void
-  addComment: (postId: number, comment: Comment) => void
-  removeComment: (postId: number, commentId: number) => void
+  // addComment: (postId: number, comment: Comment) => void
+  // removeComment: (postId: number, commentId: number) => void
   setIsLoading: (loading: boolean) => void
   setHasMore: (hasMore: boolean) => void
   incrementOffset: () => void
@@ -55,15 +57,28 @@ export const useFeedStore = create<FeedState>((set) => ({
     }),
 
   addPosts: (posts) =>
-    set((state) => ({
-      posts: [...state.posts, ...posts],
-    })),
+    set((state) => {
+      const existingIds = new Set(state.posts.map(p => p.id))
 
-  updatePost: (postId, updatedPost) =>
+      const filteredPosts = posts.filter(
+        post => !existingIds.has(post.id)
+      )
+
+      return {
+        posts: [...state.posts, ...filteredPosts]
+      }
+    }),
+
+  // updatePost: (postId, updatedPost) =>
+  //   set((state) => ({
+  //     posts: state.posts.map((post) =>
+  //       post.id === postId ? { ...post, ...updatedPost } : post
+  //     ),
+  //   })),
+  
+  removePost: (postId) =>
     set((state) => ({
-      posts: state.posts.map((post) =>
-        post.id === postId ? { ...post, ...updatedPost } : post
-      ),
+      posts: state.posts.filter((post) => post.id !== postId),
     })),
 
   toggleLike: (postId) =>
@@ -79,31 +94,31 @@ export const useFeedStore = create<FeedState>((set) => ({
       ),
     })),
 
-  addComment: (postId, comment) =>
-    set((state) => ({
-      posts: state.posts.map((post) =>
-        post.id === postId
-          ? {
-              ...post,
-              // comments: [...post.comments, comment],
-              commentsCount: post.commentCount + 1,
-            }
-          : post
-      ),
-    })),
+  // addComment: (postId, comment) =>
+  //   set((state) => ({
+  //     posts: state.posts.map((post) =>
+  //       post.id === postId
+  //         ? {
+  //             ...post,
+  //             // comments: [...post.comments, comment],
+  //             commentsCount: post.commentCount + 1,
+  //           }
+  //         : post
+  //     ),
+  //   })),
 
-  removeComment: (postId, commentId) =>
-    set((state) => ({
-      posts: state.posts.map((post) =>
-        post.id === postId
-          ? {
-              ...post,
-              // comments: post.comments.filter((c) => c.id !== commentId),
-              commentsCount: post.commentCount - 1,
-            }
-          : post
-      ),
-    })),
+  // removeComment: (postId, commentId) =>
+  //   set((state) => ({
+  //     posts: state.posts.map((post) =>
+  //       post.id === postId
+  //         ? {
+  //             ...post,
+  //             // comments: post.comments.filter((c) => c.id !== commentId),
+  //             commentsCount: post.commentCount - 1,
+  //           }
+  //         : post
+  //     ),
+  //   })),
 
   setIsLoading: (isLoading) =>
     set({
@@ -117,7 +132,7 @@ export const useFeedStore = create<FeedState>((set) => ({
 
   incrementOffset: () =>
     set((state) => ({
-      offset: state.offset + 10,
+      offset: state.offset + LIMIT,
     })),
 
   resetFeed: () =>

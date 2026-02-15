@@ -113,9 +113,9 @@ export function SearchInput({ onResultSelect }: SearchInputProps) {
                           className="w-full flex items-center gap-3 cursor-pointer transition-colors text-left"
                         >
                           <div className="h-10 w-10 rounded-full bg-primary/50 flex items-center justify-center text-sm font-semibold flex-shrink-0">
-                            {user.profilePicUrl ? (
+                            {user.imageUrl ? (
                               <img
-                                src={getImageUrl(user.profilePicUrl) || '/placeholder.svg'}
+                                src={getImageUrl(user.imageUrl) || '/placeholder.svg'}
                                 alt={user.username}
                                 className="h-10 w-10 rounded-full object-cover"
                               />
