@@ -40,7 +40,6 @@ export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }:
 
   const fetchData = useCallback(
     async (nextPage: number, isLoadMore = false) => {
-      debugger
       if (fetchingRef.current) return
   
       fetchingRef.current = true
@@ -99,7 +98,6 @@ export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }:
   }, [activeTab])
 
   useEffect(() => {
-    debugger
     const observer = new IntersectionObserver(
       entries => {
         const entry = entries[0]
