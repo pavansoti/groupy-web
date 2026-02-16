@@ -224,7 +224,7 @@ class ApiService {
 
   // Chat endpoints
   async getConversations() {
-    return this.api.get('/conversations')
+    return this.api.get('/api/conversations')
   }
 
   async getConversation(conversationId: string) {
@@ -232,7 +232,7 @@ class ApiService {
   }
 
   async createConversation(userId: string) {
-    return this.api.post('/conversations', { userId })
+    return this.api.post(`api/conversations/${userId}`, { userId })
   }
 }
 

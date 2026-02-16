@@ -19,6 +19,8 @@ import { apiService } from '@/lib/services/api'
 import { getImageUrl } from '@/lib/utils'
 import { EditProfileDialog } from './EditProfileDialog'
 import { ProfileHeaderSkeleton } from '@/components/skeletons'
+import { useChatStore } from '@/lib/stores/chatStore'
+import { useRouter } from 'next/navigation'
 interface ProfileHeaderProps {
   user: User
   isCurrentUser: boolean
@@ -27,6 +29,8 @@ interface ProfileHeaderProps {
 }
 
 export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = false }: ProfileHeaderProps) {
+  const router = useRouter()
+
   if (isLoading) {
     return <ProfileHeaderSkeleton />
   }
@@ -47,6 +51,11 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = f
   )
 
   const { setUser: setAuthUser } = useAuthStore()
+  const {
+    conversations,
+    setActiveConversation,
+    setConversations,
+  } = useChatStore()
 
   const joinDate = new Date(user.createdAt).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -154,6 +163,32 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = f
       })
     } finally {
       setIsFollowLoading(false)
+    }
+  }
+
+  const handleStartConversation = async (targetUserId: string) => {
+    try {
+      const res = await apiService.createConversation(targetUserId)
+  
+      const conversation = res.data.data
+  
+      // If conversation not already in store → add it
+      const exists = conversations.find(
+        (c) => c.id === conversation.id
+      )
+  
+      if (!exists) {
+        setConversations([conversation, ...conversations])
+      }
+  
+      // Set active
+      setActiveConversation(conversation.id)
+  
+      // Go to chat page
+      router.push('/chat')
+  
+    } catch (err) {
+      console.error("Failed to start conversation", err)
     }
   }
 
@@ -283,7 +318,9 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = f
                    )}
                  </Button>
 
-                <Button variant="outline" size="icon">
+                <Button 
+                  onClick={() => handleStartConversation(user.id.toString())}
+                  variant="outline" size="icon">
                   <MessageCircle className="h-4 w-4" />
                 </Button>
               </>

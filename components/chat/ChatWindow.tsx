@@ -6,6 +6,7 @@ import { MessageBubble } from './MessageBubble'
 import { MessageInput } from './MessageInput'
 import { Message, Conversation } from '@/lib/stores/chatStore'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { socketService as ws } from '@/lib/services/socket'
 
 interface ChatWindowProps {
   conversation: Conversation
@@ -32,6 +33,42 @@ export function ChatWindow({
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  useEffect(() => {
+    if (!conversation?.id) return
+  
+    // Subscribe to new messages
+    const messageSub = ws.subscribe(
+      `/topic/conversation/${conversation.id}`,
+      (data: Message) => {
+        console.log("Received message:", data)
+        // You must push message to parent store
+        // since messages come from props
+      }
+    )
+  
+    // Subscribe to typing
+    const typingSub = ws.subscribe(
+      `/topic/conversation/${conversation.id}/typing`,
+      (data: any) => {
+        console.log("Typing:", data)
+      }
+    )
+  
+    // Subscribe to read
+    const readSub = ws.subscribe(
+      `/topic/conversation/${conversation.id}/read`,
+      (data: any) => {
+        console.log("Read receipt:", data)
+      }
+    )
+  
+    return () => {
+      messageSub?.unsubscribe()
+      typingSub?.unsubscribe()
+      readSub?.unsubscribe()
+    }
+  }, [conversation?.id])  
 
   return (
     <Card className="flex flex-col h-full w-full">

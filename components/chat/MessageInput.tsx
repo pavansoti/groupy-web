@@ -20,6 +20,9 @@ interface MessageInputProps {
 export function MessageInput({ onSend, onTyping, isLoading = false }: MessageInputProps) {
   const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<SendMessageFormData>({
     resolver: zodResolver(sendMessageSchema),
+    defaultValues: {
+      content: '',
+    },
   })
   const [isRecording, setIsRecording] = useState(false)
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)

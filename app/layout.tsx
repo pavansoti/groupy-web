@@ -7,6 +7,7 @@ import { ToastProvider } from '@/components/providers/ToastProvider'
 import { AuthProvider } from '@/components/providers/AuthProvider'
 import './globals.css'
 import { BubbleBackground } from "@/components/ui/BubbleBackground"
+import { SocketProvider } from "@/components/providers/SocketProvider"
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -49,9 +50,11 @@ export default function RootLayout({
       <body className="font-sans antialiased" suppressHydrationWarning>
         <AuthProvider>
           <ThemeProvider>
-            <BubbleBackground />
-            <ToastProvider />
-            {children}
+            {/* <SocketProvider> */}
+              <BubbleBackground />
+              <ToastProvider />
+              {children}
+            {/* </SocketProvider> */}
           </ThemeProvider>
         </AuthProvider>
         <Analytics />
