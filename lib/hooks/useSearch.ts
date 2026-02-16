@@ -48,7 +48,7 @@ export function useSearch() {
       if (query) {
         search(query)
       }
-    }, 300)
+    }, 1000)
 
     return () => clearTimeout(timer)
   }, [query, search])
