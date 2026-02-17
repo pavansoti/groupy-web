@@ -1,6 +1,6 @@
 'use client'
 
-import { Conversation } from '@/lib/stores/chatStore'
+import { Conversation, useChatStore } from '@/lib/stores/chatStore'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
@@ -12,6 +12,16 @@ interface ConversationItemProps {
 }
 
 export function ConversationItem({ conversation, isActive = false, onSelect }: ConversationItemProps) {
+  
+  const { typingUsers } = useChatStore()
+  // console.log('typingUsers',typingUsers)
+  // Check if user is typing in this conversation
+  const isTyping = Array.from(typingUsers.keys()).some(
+    key => key.startsWith(`${conversation.id}:`) && key === `${conversation.id}:${conversation.participantUsername}`
+  )
+
+  // console.log("[v0] ConversationItem:", conversation)
+  
   return (
     <button
       onClick={onSelect}
@@ -41,7 +51,11 @@ export function ConversationItem({ conversation, isActive = false, onSelect }: C
             {conversation.participantUsername}
           </p>
           <p className="text-xs text-muted-foreground truncate">
-            {conversation.lastMessage || 'No messages yet'}
+            {isTyping ? (
+              <span className="text-blue-500">typing...</span>
+            ) : (
+              conversation.lastMessage || 'No messages yet'
+            )}
           </p>
         </div>
       </div>

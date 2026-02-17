@@ -31,9 +31,20 @@ export function MessageInput({ onSend, onTyping, isLoading = false }: MessageInp
   const contentValue = watch('content')
 
   const onSubmit = async (data: SendMessageFormData) => {
-    onSend(data.content, 'text')
-    reset()
-    setShowEmojiPicker(false)
+    if (!data.content.trim()) {
+      toast.error('Message cannot be empty')
+      return
+    }
+
+    try {
+      onSend(data.content, 'text')
+      reset()
+      setShowEmojiPicker(false)
+      // Clear typing status
+      onTyping?.(false)
+    } catch (error) {
+      toast.error('Failed to send message')
+    }
   }
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,15 +56,23 @@ export function MessageInput({ onSend, onTyping, isLoading = false }: MessageInp
       return
     }
 
-    const reader = new FileReader()
-    reader.onload = () => {
-      const base64 = reader.result as string
-      onSend(`[File: ${file.name}] ${base64}`, 'file')
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
+    try {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const base64 = reader.result as string
+        onSend(`[File: ${file.name}] ${base64}`, 'file')
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
+        toast.success('File sent successfully')
       }
+      reader.onerror = () => {
+        toast.error('Failed to read file')
+      }
+      reader.readAsDataURL(file)
+    } catch (error) {
+      toast.error('Failed to send file')
     }
-    reader.readAsDataURL(file)
   }
 
   const handleStartRecording = async () => {
@@ -68,14 +87,24 @@ export function MessageInput({ onSend, onTyping, isLoading = false }: MessageInp
       }
 
       recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'audio/webm' })
-        const reader = new FileReader()
-        reader.onload = () => {
-          const base64 = reader.result as string
-          onSend(`[Audio: voice message] ${base64}`, 'audio')
+        try {
+          const blob = new Blob(chunks, { type: 'audio/webm' })
+          const reader = new FileReader()
+          reader.onload = () => {
+            const base64 = reader.result as string
+            onSend(`[Audio: voice message] ${base64}`, 'audio')
+            toast.success('Audio message sent')
+          }
+          reader.onerror = () => {
+            toast.error('Failed to read audio file')
+          }
+          reader.readAsDataURL(blob)
+        } catch (error) {
+          console.error("[v0] Error processing audio:", error)
+          toast.error('Failed to process audio')
+        } finally {
+          stream.getTracks().forEach(track => track.stop())
         }
-        reader.readAsDataURL(blob)
-        stream.getTracks().forEach(track => track.stop())
       }
 
       recorder.start()
@@ -87,10 +116,15 @@ export function MessageInput({ onSend, onTyping, isLoading = false }: MessageInp
   }
 
   const handleStopRecording = () => {
-    if (audioRef.current) {
-      audioRef.current.stop()
-      setIsRecording(false)
-      toast.success('Audio recorded successfully')
+    try {
+      if (audioRef.current) {
+        audioRef.current.stop()
+        setIsRecording(false)
+        toast.info('Processing audio...')
+      }
+    } catch (error) {
+      console.error("[v0] Error stopping recording:", error)
+      toast.error('Failed to stop recording')
     }
   }
 
