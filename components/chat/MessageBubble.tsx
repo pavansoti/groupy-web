@@ -29,10 +29,15 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
   }
 
   const handleDownload = (base64: string, label: string) => {
-    const link = document.createElement('a')
-    link.href = base64
-    link.download = label.replace(/[File:|Audio:]/g, '').trim() || 'download'
-    link.click()
+    try {
+      const link = document.createElement('a')
+      link.href = base64
+      link.download = label.replace(/[File:|Audio:]/g, '').trim() || 'download'
+      link.click()
+      console.log("[v0] File download initiated:", label)
+    } catch (error) {
+      console.error("[v0] Download error:", error)
+    }
   }
 
   return (
@@ -79,6 +84,7 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
                   size="sm"
                   onClick={() => handleDownload(extractContent(message.content), extractLabel(message.content))}
                   className="p-0 h-auto w-auto hover:bg-transparent"
+                  title="Download file"
                 >
                   <Download className="h-4 w-4" />
                 </Button>
@@ -89,10 +95,11 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
                   controls
                   src={extractContent(message.content)}
                   className="h-6 w-40 sm:w-48"
+                  onError={() => console.error("[v0] Audio playback error")}
                 />
               </div>
             ) : (
-              <p className="text-sm break-words">{message.content}</p>
+              <p className="text-sm break-words whitespace-pre-wrap">{message.content}</p>
             )}
           </div>
           

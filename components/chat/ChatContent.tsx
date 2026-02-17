@@ -1,50 +1,150 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
-import { useChatStore } from '@/lib/stores/chatStore'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Message, useChatStore } from '@/lib/stores/chatStore'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { Card } from '@/components/ui/card'
 import { ConversationItem } from './ConversationItem'
 import { ChatWindow } from './ChatWindow'
 import { socketService } from '@/lib/services/socket'
 import { apiService } from '@/lib/services/api'
+import { toast } from 'sonner'
 
 export function ChatContent() {
   const { user } = useAuth()
-  const { conversations, activeConversationId, setConversations, setActiveConversation, messages } = useChatStore()
-  const [mounted, setMounted] = useState(false)
-  const [showConversationList, setShowConversationList] = useState(true)
 
+  const {
+    conversations,
+    activeConversationId,
+    messages,
+    loadingConversations,
+    loadingMessages,
+    setConversations,
+    updateConversationLastMessage,
+    updateConversationUnreadCount,
+    setActiveConversation,
+    addMessage,
+    addMessages,
+    setTyping,
+    setLoadingConversations,
+    setLoadingMessages,
+  } = useChatStore()
+  
+  const [connected, setConnected] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  
   useEffect(() => {
     setMounted(true)
-    socketService.connect().then(() =>{
-      console.log("WebSocket Connected")
-    })
-
+  
+    const initSocket = async () => {
+      try {
+        await socketService.connect()
+        setConnected(true)
+        console.log("WebSocket Connected")
+        fetchConversations() // fetch after socket connects
+      } catch (error) {
+        console.error("WebSocket connection failed:", error)
+        toast.error("Failed to connect to chat service")
+      }
+    }
+  
+    initSocket()
+  
     return () => {
       socketService.disconnect()
+      setConnected(false)
       console.log("WebSocket Disconnected")
     }
   }, [])
 
-  useEffect(() => {
-    const fetchConversations = async () => {
-      if (conversations.length === 0) {
-        try {
-          const res = await apiService.getConversations()
+  const fetchConversations = async () => {
+    setLoadingConversations(true)
   
-          if (res?.data?.success) {
-            const data = res.data.data
-            setConversations(data)
-          }
-        } catch (err) {
-          console.error('Fetch conversations failed', err)
-        }
+    try {
+      const res = await apiService.getConversations()
+  
+      if (res?.data?.success) {
+        setConversations(res.data.data)
       }
+    } catch (err) {
+      console.error("Fetch conversations failed:", err)
+      toast.error("Failed to load conversations")
+    } finally {
+      setLoadingConversations(false)
     }
+  }
   
-    fetchConversations()
-  }, [conversations.length])  
+  const [showConversationList, setShowConversationList] = useState(true)
+  const subscriptionsRef = useRef<Map<string, any>>(new Map())
+
+  useEffect(() => {
+    if (!activeConversationId || !connected) return
+  
+    const conversationId = activeConversationId
+  
+    console.log("Subscribing to:", conversationId)
+  
+    setLoadingMessages(conversationId, true)
+  
+    // MUST JOIN CONVERSATION (THIS WAS MISSING)
+    socketService.joinConversation(conversationId)
+  
+    // Mark as read
+    socketService.markAsRead(conversationId)
+  
+    // History subscription
+    const historySub = socketService.subscribeToUserMessages((data: any) => {
+      if (
+        data?.type === "HISTORY" &&
+        data?.conversationId === conversationId &&
+        Array.isArray(data?.messages)
+      ) {
+        console.log("---------data.messages-----------:", data.messages)
+        addMessages(conversationId, data.messages)
+        updateConversationUnreadCount(conversationId, 0)
+        setLoadingMessages(conversationId, false)
+      }
+    })
+  
+    // New messages
+    const messageSub = socketService.subscribeToConversationMessages(
+      conversationId,
+      (messageData: Message) => {
+        addMessage(messageData)
+        console.log("--------------------:", messageData)
+        updateConversationLastMessage(
+          conversationId,
+          messageData.content,
+          messageData.createdAt
+        )
+      }
+    )
+  
+    // Typing
+    const typingSub = socketService.subscribeToConversationTyping(
+      conversationId,
+      ({ userName, typing }) => {
+        setTyping(conversationId, userName, typing)
+      }
+    )
+  
+    // Read receipts
+    const readSub = socketService.subscribeToConversationRead(
+      conversationId,
+      (readData: any) => {
+        // console.log("Read receipt:", readData)
+      }
+    )
+  
+    return () => {
+      console.log("Unsubscribing from:", conversationId)
+  
+      historySub?.unsubscribe?.()
+      messageSub?.unsubscribe?.()
+      typingSub?.unsubscribe?.()
+      readSub?.unsubscribe?.()
+    }
+  }, [activeConversationId, connected])
 
   const activeConversation = conversations.find(
     (c) => c.id === activeConversationId
@@ -58,13 +158,16 @@ export function ChatContent() {
     return null
   }
 
+  // console.log("[v0] Active conversation:", activeConversation)
+  // console.log("[v0] Active messages:", activeMessages)
+
   return (
-    <div className="h-[calc(100vh-80px)] flex flex-col md:grid md:grid-cols-3 gap-0 md:gap-4 p-2 sm:p-4 md:p-6 lg:p-8">
+    <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-70px)] flex flex-col md:grid md:grid-cols-3 gap-0 md:gap-4 p-2 sm:p-4 md:p-6 lg:p-8 md:pb-1 lg:pb-2">
       {/* Conversations Sidebar */}
       <div 
         className={`${
           showConversationList ? 'flex' : 'hidden'
-        } md:flex flex-col md:col-span-1 space-y-3 overflow-y-auto border-r border-border`}
+        } md:flex flex-col md:col-span-1 space-y-3 overflow-y-auto md:border-r border-border`}
       >
         <div className="flex items-center justify-between pb-2">
           <h2 className="text-lg font-semibold">Messages</h2>
@@ -77,7 +180,7 @@ export function ChatContent() {
         </div>
 
         {conversations.length === 0 ? (
-          <Card className="p-4 text-center text-muted-foreground text-sm mr-2">
+          <Card className="p-4 text-center text-muted-foreground text-sm md:mr-2 mb-2 md:mb-0">
             No conversations yet. Search for users to start chatting!
           </Card>
         ) : (
@@ -118,6 +221,7 @@ export function ChatContent() {
               onTyping={(isTyping) =>
                 socketService.setTyping(activeConversation.id, isTyping)
               }
+              isLoading={loadingConversations || loadingMessages.get(activeConversationId)}
             />
           </>
         ) : (

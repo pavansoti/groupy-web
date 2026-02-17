@@ -4,9 +4,10 @@ import { useEffect, useRef } from 'react'
 import { Card } from '@/components/ui/card'
 import { MessageBubble } from './MessageBubble'
 import { MessageInput } from './MessageInput'
-import { Message, Conversation } from '@/lib/stores/chatStore'
+import { Message, Conversation, useChatStore } from '@/lib/stores/chatStore'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { socketService as ws } from '@/lib/services/socket'
+import { toast } from 'sonner'
 
 interface ChatWindowProps {
   conversation: Conversation
@@ -24,7 +25,9 @@ export function ChatWindow({
   isLoading = false,
 }: ChatWindowProps) {
   const { user } = useAuth()
+  const { typingUsers } = useChatStore()
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -34,41 +37,15 @@ export function ChatWindow({
     scrollToBottom()
   }, [messages])
 
+  // Join conversation and mark as read on mount
   useEffect(() => {
-    if (!conversation?.id) return
-  
-    // Subscribe to new messages
-    const messageSub = ws.subscribe(
-      `/topic/conversation/${conversation.id}`,
-      (data: Message) => {
-        console.log("Received message:", data)
-        // You must push message to parent store
-        // since messages come from props
-      }
-    )
-  
-    // Subscribe to typing
-    const typingSub = ws.subscribe(
-      `/topic/conversation/${conversation.id}/typing`,
-      (data: any) => {
-        console.log("Typing:", data)
-      }
-    )
-  
-    // Subscribe to read
-    const readSub = ws.subscribe(
-      `/topic/conversation/${conversation.id}/read`,
-      (data: any) => {
-        console.log("Read receipt:", data)
-      }
-    )
-  
-    return () => {
-      messageSub?.unsubscribe()
-      typingSub?.unsubscribe()
-      readSub?.unsubscribe()
+    if (!conversation?.id || !ws.isConnected()) {
+      return
     }
-  }, [conversation?.id])  
+      console.log("[v0] ChatWindow: Joining conversation", conversation.id)
+      ws.joinConversation(conversation.id)
+      ws.markAsRead(conversation.id)
+  }, [conversation?.id])
 
   return (
     <Card className="flex flex-col h-full w-full">
@@ -99,7 +76,11 @@ export function ChatWindow({
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
-        {messages.length === 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-muted-foreground text-xs sm:text-sm">Loading messages...</p>
+          </div>
+        ) : messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-muted-foreground text-xs sm:text-sm text-center">No messages yet. Start a conversation!</p>
           </div>
@@ -112,6 +93,22 @@ export function ChatWindow({
                 isOwn={message.senderId === user?.id}
               />
             ))}
+            {/* Typing indicators */}
+            {Array.from(typingUsers.keys()).some(
+              key => key.startsWith(`${conversation.id}:`) && !key.includes(user?.username || '')
+            ) && (
+              <div className="flex gap-2 items-center">
+                <div className="h-8 w-8 rounded-full bg-muted flex-shrink-0" />
+                <div className="flex gap-1 items-center">
+                  <span className="text-xs text-muted-foreground">typing</span>
+                  <span className="flex gap-0.5">
+                    <span className="h-1 w-1 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="h-1 w-1 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="h-1 w-1 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </span>
+                </div>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </>
         )}

@@ -50,11 +50,11 @@ export default function RootLayout({
       <body className="font-sans antialiased" suppressHydrationWarning>
         <AuthProvider>
           <ThemeProvider>
-            {/* <SocketProvider> */}
+            <SocketProvider>
               <BubbleBackground />
               <ToastProvider />
               {children}
-            {/* </SocketProvider> */}
+            </SocketProvider>
           </ThemeProvider>
         </AuthProvider>
         <Analytics />

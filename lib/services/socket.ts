@@ -122,6 +122,7 @@ const TOKEN_KEY =
 class SocketService {
   private stompClient: Client | null = null
   private connected = false
+  private subscriptions: Map<string, any> = new Map()
 
   connect(token?: string): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -129,11 +130,6 @@ class SocketService {
         resolve()
         return
       }
-      console.log('[Socket] Connecting...', token)
-      console.log(
-        (typeof window !== 'undefined'
-          ? sessionStorage.getItem(TOKEN_KEY)
-          : null))
       const authToken =
         token ||
         (typeof window !== 'undefined'
@@ -143,7 +139,7 @@ class SocketService {
       this.stompClient = new Client({
         webSocketFactory: () => new SockJS(WS_URL),
         reconnectDelay: 5000,
-        debug: (str) => console.log('[STOMP]', str),
+        // debug: (str) => console.log('[STOMP]', str),
         connectHeaders: {
           Authorization: `Bearer ${authToken}`,
         },
@@ -170,6 +166,16 @@ class SocketService {
   }
 
   disconnect() {
+
+    // Unsubscribe from all topics
+    this.subscriptions.forEach((sub) => {
+      if (sub && typeof sub.unsubscribe === 'function') {
+        sub.unsubscribe()
+      }
+    })
+
+    this.subscriptions.clear()
+
     if (this.stompClient) {
       this.stompClient.deactivate()
       this.connected = false
@@ -180,17 +186,55 @@ class SocketService {
     return this.connected
   }
 
-  // 🔥 Subscribe to topic
-  subscribe(destination: string, callback: (data: any) => void) {
-    if (!this.stompClient || !this.connected) return
+  private connectionListeners: (() => void)[] = []
 
-    console.log('[Socket] Subscribing to:', destination)
-    return this.stompClient.subscribe(destination, (message: IMessage) => {
-      callback(JSON.parse(message.body))
-    })
+  onConnect(callback: () => void) {
+    this.connectionListeners.push(callback)
   }
 
-  // 🔥 Send message to backend
+  private notifyConnected() {
+    this.connectionListeners.forEach(cb => cb())
+  }
+
+  // Subscribe to topic
+  subscribe(destination: string, callback: (data: any) => void) {
+    if (!this.stompClient || !this.connected) {
+      console.warn('[Socket] Cannot subscribe - not connected')
+      return null
+    }
+
+    console.log('[Socket] Subscribing to:', destination)
+    // Check if already subscribed
+    if (this.subscriptions.has(destination)) {
+      console.log('[Socket] Already subscribed to:', destination)
+      return this.subscriptions.get(destination)
+    }
+
+    const subscription = this.stompClient.subscribe(destination, (message: IMessage) => {
+      try {
+        console.log('[Socket] Received message:', message)
+        callback(JSON.parse(message.body))
+      } catch (error) {
+        console.error('[Socket] Error parsing message:', error)
+      }
+    })
+
+    // Store subscription for cleanup
+    this.subscriptions.set(destination, subscription)
+    return subscription
+  }
+
+  // Unsubscribe from a specific topic
+  unsubscribe(destination: string) {
+    const subscription = this.subscriptions.get(destination)
+    if (subscription && typeof subscription.unsubscribe === 'function') {
+      subscription.unsubscribe()
+      this.subscriptions.delete(destination)
+      console.log('[Socket] Unsubscribed from:', destination)
+    }
+  }
+
+  // Send message to backend
   send(destination: string, body: any) {
     if (!this.stompClient || !this.connected) return
 
@@ -215,6 +259,7 @@ class SocketService {
     content: string,
     type: 'text' | 'file' | 'audio' = 'text'
   ) {
+    console.log('sendMessage', { conversationId, content, type })
     this.send('/app/chat.send', {
       conversationId,
       content,
@@ -226,7 +271,7 @@ class SocketService {
     console.log('setTyping', { conversationId, isTyping })
     this.send('/app/chat.typing', {
       conversationId,
-      isTyping,
+      typing: isTyping,
     })
   }
 
@@ -235,6 +280,53 @@ class SocketService {
     this.send('/app/chat.read', {
       conversationId,
     })
+  }
+
+  // ===============================
+  // Subscription helpers
+  // ===============================
+
+  subscribeToUserMessages(callback: (data: any) => void) {
+    return this.subscribe('/user/queue/conversation-history', callback)
+  }
+
+  subscribeToConversationMessages(conversationId: string, callback: (data: any) => void) {
+    return this.subscribe(`/topic/conversation/${conversationId}`, callback)
+  }
+
+  subscribeToConversationTyping(conversationId: string, callback: (data: any) => void) {
+    return this.subscribe(`/topic/conversation/${conversationId}/typing`, callback)
+  }
+
+  subscribeToConversationRead(conversationId: string, callback: (data: any) => void) {
+    return this.subscribe(`/topic/conversation/${conversationId}/read`, callback)
+  }
+
+  // subscribeToUserMessages(){
+
+  //   if(!this.stompClient) return;
+
+  //   this.stompClient.subscribe(
+  //     "/user/queue/conversation-history",
+  //     (message) => {
+  //       const data = JSON.parse(message.body);
+  //       console.log(data);
+        
+  //       // if (data.type === "HISTORY") {
+  //       //   setMessages(data.messages);
+  //       // }
+  //     }
+  //   );
+  // }
+
+  unSubscribeToUserMessages() {
+    this.unsubscribe('/user/queue/conversation-history')
+  }
+
+  unsubscribeFromConversation(conversationId: string) {
+    this.unsubscribe(`/topic/conversation/${conversationId}`)
+    this.unsubscribe(`/topic/conversation/${conversationId}/typing`)
+    this.unsubscribe(`/topic/conversation/${conversationId}/read`)
   }
 }
 
