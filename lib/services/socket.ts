@@ -301,24 +301,7 @@ class SocketService {
   subscribeToConversationRead(conversationId: string, callback: (data: any) => void) {
     return this.subscribe(`/topic/conversation/${conversationId}/read`, callback)
   }
-
-  // subscribeToUserMessages(){
-
-  //   if(!this.stompClient) return;
-
-  //   this.stompClient.subscribe(
-  //     "/user/queue/conversation-history",
-  //     (message) => {
-  //       const data = JSON.parse(message.body);
-  //       console.log(data);
-        
-  //       // if (data.type === "HISTORY") {
-  //       //   setMessages(data.messages);
-  //       // }
-  //     }
-  //   );
-  // }
-
+  
   unSubscribeToUserMessages() {
     this.unsubscribe('/user/queue/conversation-history')
   }

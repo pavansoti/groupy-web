@@ -162,14 +162,29 @@ export function ChatContent() {
   // console.log("[v0] Active messages:", activeMessages)
 
   return (
-    <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-70px)] flex flex-col md:grid md:grid-cols-3 gap-0 md:gap-4 p-2 sm:p-4 md:p-6 lg:p-8 md:pb-1 lg:pb-2">
-      {/* Conversations Sidebar */}
-      <div 
-        className={`${
-          showConversationList ? 'flex' : 'hidden'
-        } md:flex flex-col md:col-span-1 space-y-3 overflow-y-auto md:border-r border-border`}
+    <div
+      className="
+        h-[calc(100vh-120px)] md:h-[calc(100vh-70px)]
+        flex flex-col md:grid md:grid-cols-3
+        overflow-hidden
+        gap-0 md:gap-4
+        p-2 sm:p-4 md:p-6 lg:p-8
+        md:pb-1 lg:pb-2
+      "
+    >
+      {/* Sidebar */}
+      <div
+        className={`
+          ${showConversationList ? "flex" : "hidden"}
+          md:flex md:col-span-1
+          flex-col
+          min-h-0
+          overflow-y-auto
+          md:border-r border-border
+          pr-0 md:pr-2
+        `}
       >
-        <div className="flex items-center justify-between pb-2">
+        {/* <div className="flex items-center justify-between pb-2">
           <h2 className="text-lg font-semibold">Messages</h2>
           <button
             onClick={() => setShowConversationList(false)}
@@ -177,22 +192,22 @@ export function ChatContent() {
           >
             ✕
           </button>
-        </div>
+        </div> */}
 
         {conversations.length === 0 ? (
-          <Card className="p-4 text-center text-muted-foreground text-sm md:mr-2 mb-2 md:mb-0">
+          <Card className="p-4 text-center text-muted-foreground text-sm">
             No conversations yet. Search for users to start chatting!
           </Card>
         ) : (
-          <div className="space-y-2 mr-2">
+          <div className="space-y-2">
             {conversations.map((conversation) => (
               <ConversationItem
                 key={conversation.id}
                 conversation={conversation}
                 isActive={activeConversationId === conversation.id}
                 onSelect={() => {
-                  setActiveConversation(conversation.id)
-                  setShowConversationList(false)
+                  setActiveConversation(conversation.id);
+                  setShowConversationList(false);
                 }}
               />
             ))}
@@ -200,10 +215,15 @@ export function ChatContent() {
         )}
       </div>
 
-      {/* Chat Window */}
-      <div className="flex-1 md:col-span-2 flex flex-col min-w-0">
-        {activeConversation ? (
-          <>
+      {/* Chat Column */}
+      <div className={`flex flex-col md:col-span-2 min-h-0 min-w-0 ${!showConversationList ? "h-full" : "" }`}>
+        {activeConversation && (
+          <div className={`
+            ${!showConversationList ? "block" : "hidden"}
+            md:block
+            flex flex-col md:col-span-2 min-h-0 min-w-0 h-full
+          `}>
+            {/* Mobile Back Button */}
             <div className="md:hidden mb-2">
               <button
                 onClick={() => setShowConversationList(true)}
@@ -221,11 +241,15 @@ export function ChatContent() {
               onTyping={(isTyping) =>
                 socketService.setTyping(activeConversation.id, isTyping)
               }
-              isLoading={loadingConversations || loadingMessages.get(activeConversationId)}
+              isLoading={
+                loadingConversations ||
+                loadingMessages.get(activeConversationId)
+              }
             />
-          </>
-        ) : (
-          <Card className="flex items-center justify-center h-full">
+          </div>
+        )}
+        {!activeConversation && (
+          <Card className="hidden md:flex items-center justify-center h-full">
             <p className="text-muted-foreground text-sm">
               Select a conversation to start chatting
             </p>
