@@ -37,16 +37,16 @@ export function ChatWindow({
   useEffect(() => {
     scrollToBottom()
   }, [messages])
-
+  // console.log(conversation)
   // Join conversation and mark as read on mount
-  useEffect(() => {
-    if (!conversation?.id || !ws.isConnected()) {
-      return
-    }
-      console.log("[v0] ChatWindow: Joining conversation", conversation.id)
-      ws.joinConversation(conversation.id)
-      ws.markAsRead(conversation.id)
-  }, [conversation?.id])
+  // useEffect(() => {
+  //   if (!conversation?.id || !ws.isConnected()) {
+  //     return
+  //   }
+  //     console.log("[v0] ChatWindow: Joining conversation", conversation.id)
+  //     ws.joinConversation(conversation.id)
+  //     ws.markAsRead(conversation.id)
+  // }, [conversation?.id])
 
   return (
     <Card className="flex flex-col h-full w-full min-h-0 gap-0 py-0">
@@ -79,35 +79,52 @@ export function ChatWindow({
       </div>
   
       {/* Messages */}
-<div className="flex-1 min-h-0 overflow-y-auto p-4 custom-scrollbar flex flex-col">
-  {isLoading ? (
-    <div className="flex flex-1 items-center justify-center">
-      <p className="text-muted-foreground text-sm">
-        Loading messages...
-      </p>
-    </div>
-  ) : messages.length === 0 ? (
-    <div className="flex flex-1 items-center justify-center">
-      <p className="text-muted-foreground text-sm">
-        No messages yet.
-      </p>
-    </div>
-  ) : (
-    <>
-      <div className="flex flex-col gap-4">
-        {messages.map((message) => (
-          <MessageBubble
-            key={message.id}
-            message={message}
-            isOwn={message.senderId === user?.id}
-          />
-        ))}
-      </div>
-      <div ref={messagesEndRef} />
-    </>
-  )}
-</div>
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 custom-scrollbar flex flex-col">
+        {isLoading ? (
+          <div className="flex flex-1 items-center justify-center">
+            <p className="text-muted-foreground text-sm">
+              Loading messages...
+            </p>
+          </div>
+        ) : messages.length === 0 ? (
+          <div className="flex flex-1 items-center justify-center">
+            <p className="text-muted-foreground text-sm">
+              No messages yet.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-col gap-4">
+              {messages.map((message) => (
+                <MessageBubble
+                  key={message.id}
+                  message={message}
+                  isOwn={message.senderId == user?.id}
+                />
+              ))}
+            </div>
 
+            {/* Typing indicators */}
+            {Array.from(typingUsers.keys()).some(
+              key => key.startsWith(`${conversation.id}:`) && !key.includes(user?.username || '')
+            ) && (
+              <div className="flex gap-2 items-center">
+                <div className="h-8 w-8 rounded-full bg-muted flex-shrink-0" />
+                <div className="flex gap-1 items-center">
+                  <span className="text-xs text-muted-foreground">typing</span>
+                  <span className="flex gap-0.5">
+                    <span className="h-1 w-1 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="h-1 w-1 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="h-1 w-1 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </span>
+                </div>
+              </div>
+            )}
+            
+            <div ref={messagesEndRef} />
+          </>
+        )}
+      </div>
   
       {/* Input */}
       <div className="border-t border-border p-4 flex-shrink-0">

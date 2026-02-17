@@ -44,6 +44,7 @@ interface ChatState {
   setLoadingConversations: (loading: boolean) => void
   setLoadingMessages: (conversationId: string, loading: boolean) => void
   updateConversationUnreadCount: (conversationId: string, count: number) => void
+  updateUserStatus: (username: string, isOnline: boolean) => void
 }
 
 export const useChatStore = create<ChatState>((set) => ({
@@ -121,6 +122,15 @@ export const useChatStore = create<ChatState>((set) => ({
         conversations: updatedConversations,
       }
     }),
+
+  updateUserStatus: (username: string, isOnline: boolean) =>
+    set((state) => ({
+      conversations: state.conversations.map((conv) =>
+        conv.participantUsername === username
+          ? { ...conv, isOnline }
+          : conv
+      ),
+    })),
 
   clearMessages: (conversationId) =>
     set((state) => {

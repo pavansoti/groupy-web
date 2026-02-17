@@ -30,7 +30,7 @@ export function ChatContent() {
     setLoadingMessages,
   } = useChatStore()
   
-  const [connected, setConnected] = useState(false)
+  // const [connected, setConnected] = useState(false)
   const [mounted, setMounted] = useState(false)
   
   useEffect(() => {
@@ -38,8 +38,8 @@ export function ChatContent() {
   
     const initSocket = async () => {
       try {
-        await socketService.connect()
-        setConnected(true)
+        // await socketService.connect()
+        // setConnected(true)
         console.log("WebSocket Connected")
         fetchConversations() // fetch after socket connects
       } catch (error) {
@@ -51,8 +51,8 @@ export function ChatContent() {
     initSocket()
   
     return () => {
-      socketService.disconnect()
-      setConnected(false)
+      // socketService.disconnect()
+      // setConnected(false)
       console.log("WebSocket Disconnected")
     }
   }, [])
@@ -73,12 +73,31 @@ export function ChatContent() {
       setLoadingConversations(false)
     }
   }
-  
-  const [showConversationList, setShowConversationList] = useState(true)
-  const subscriptionsRef = useRef<Map<string, any>>(new Map())
 
   useEffect(() => {
-    if (!activeConversationId || !connected) return
+    if (!socketService.isConnected()) return;
+  
+    const historySub = socketService.subscribeToUserMessages((data: any) => {
+      if (
+        data?.type === "HISTORY" &&
+        Array.isArray(data?.messages)
+      ) {
+        addMessages(data.conversationId, data.messages)
+        setLoadingMessages(data.conversationId, false)
+      }
+    });
+  
+    return () => {
+      historySub?.unsubscribe?.()
+    }
+  
+  }, [socketService.isConnected()])
+  
+  const [showConversationList, setShowConversationList] = useState(true)
+  // const subscriptionsRef = useRef<Map<string, any>>(new Map())
+
+  useEffect(() => {
+    if (!activeConversationId || !socketService.isConnected()) return
   
     const conversationId = activeConversationId
   
@@ -93,18 +112,18 @@ export function ChatContent() {
     socketService.markAsRead(conversationId)
   
     // History subscription
-    const historySub = socketService.subscribeToUserMessages((data: any) => {
-      if (
-        data?.type === "HISTORY" &&
-        data?.conversationId === conversationId &&
-        Array.isArray(data?.messages)
-      ) {
-        console.log("---------data.messages-----------:", data.messages)
-        addMessages(conversationId, data.messages)
-        updateConversationUnreadCount(conversationId, 0)
-        setLoadingMessages(conversationId, false)
-      }
-    })
+    // const historySub = socketService.subscribeToUserMessages((data: any) => {
+    //   if (
+    //     data?.type === "HISTORY" &&
+    //     data?.conversationId === conversationId &&
+    //     Array.isArray(data?.messages)
+    //   ) {
+    //     console.log("---------data.messages-----------:", data.messages)
+    //     addMessages(conversationId, data.messages)
+    //     updateConversationUnreadCount(conversationId, 0)
+    //     setLoadingMessages(conversationId, false)
+    //   }
+    // })
   
     // New messages
     const messageSub = socketService.subscribeToConversationMessages(
@@ -139,12 +158,12 @@ export function ChatContent() {
     return () => {
       console.log("Unsubscribing from:", conversationId)
   
-      historySub?.unsubscribe?.()
+      // historySub?.unsubscribe?.()
       messageSub?.unsubscribe?.()
       typingSub?.unsubscribe?.()
       readSub?.unsubscribe?.()
     }
-  }, [activeConversationId, connected])
+  }, [activeConversationId, socketService.isConnected()])
 
   const activeConversation = conversations.find(
     (c) => c.id === activeConversationId
