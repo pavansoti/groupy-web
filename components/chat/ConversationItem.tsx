@@ -27,7 +27,7 @@ export function ConversationItem({ conversation, isActive = false, onSelect }: C
       onClick={onSelect}
       className={cn(
         'w-full p-2 sm:p-3 text-left rounded-lg transition-colors flex items-center justify-between gap-2',
-        isActive ? 'bg-primary/10 border border-primary' : 'hover:bg-muted'
+        isActive ? 'bg-primary/10 border border-primary' : 'bg-primary/5 hover:bg-muted'
       )}
     >
       <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">

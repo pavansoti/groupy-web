@@ -30,7 +30,7 @@ export function ChatContent() {
     setLoadingMessages,
   } = useChatStore()
   
-  const [connected, setConnected] = useState(false)
+  // const [connected, setConnected] = useState(false)
   const [mounted, setMounted] = useState(false)
   
   useEffect(() => {
@@ -38,8 +38,8 @@ export function ChatContent() {
   
     const initSocket = async () => {
       try {
-        await socketService.connect()
-        setConnected(true)
+        // await socketService.connect()
+        // setConnected(true)
         console.log("WebSocket Connected")
         fetchConversations() // fetch after socket connects
       } catch (error) {
@@ -51,8 +51,8 @@ export function ChatContent() {
     initSocket()
   
     return () => {
-      socketService.disconnect()
-      setConnected(false)
+      // socketService.disconnect()
+      // setConnected(false)
       console.log("WebSocket Disconnected")
     }
   }, [])
@@ -73,12 +73,31 @@ export function ChatContent() {
       setLoadingConversations(false)
     }
   }
-  
-  const [showConversationList, setShowConversationList] = useState(true)
-  const subscriptionsRef = useRef<Map<string, any>>(new Map())
 
   useEffect(() => {
-    if (!activeConversationId || !connected) return
+    if (!socketService.isConnected()) return;
+  
+    const historySub = socketService.subscribeToUserMessages((data: any) => {
+      if (
+        data?.type === "HISTORY" &&
+        Array.isArray(data?.messages)
+      ) {
+        addMessages(data.conversationId, data.messages)
+        setLoadingMessages(data.conversationId, false)
+      }
+    });
+  
+    return () => {
+      historySub?.unsubscribe?.()
+    }
+  
+  }, [socketService.isConnected()])
+  
+  const [showConversationList, setShowConversationList] = useState(true)
+  // const subscriptionsRef = useRef<Map<string, any>>(new Map())
+
+  useEffect(() => {
+    if (!activeConversationId || !socketService.isConnected()) return
   
     const conversationId = activeConversationId
   
@@ -93,18 +112,18 @@ export function ChatContent() {
     socketService.markAsRead(conversationId)
   
     // History subscription
-    const historySub = socketService.subscribeToUserMessages((data: any) => {
-      if (
-        data?.type === "HISTORY" &&
-        data?.conversationId === conversationId &&
-        Array.isArray(data?.messages)
-      ) {
-        console.log("---------data.messages-----------:", data.messages)
-        addMessages(conversationId, data.messages)
-        updateConversationUnreadCount(conversationId, 0)
-        setLoadingMessages(conversationId, false)
-      }
-    })
+    // const historySub = socketService.subscribeToUserMessages((data: any) => {
+    //   if (
+    //     data?.type === "HISTORY" &&
+    //     data?.conversationId === conversationId &&
+    //     Array.isArray(data?.messages)
+    //   ) {
+    //     console.log("---------data.messages-----------:", data.messages)
+    //     addMessages(conversationId, data.messages)
+    //     updateConversationUnreadCount(conversationId, 0)
+    //     setLoadingMessages(conversationId, false)
+    //   }
+    // })
   
     // New messages
     const messageSub = socketService.subscribeToConversationMessages(
@@ -139,12 +158,12 @@ export function ChatContent() {
     return () => {
       console.log("Unsubscribing from:", conversationId)
   
-      historySub?.unsubscribe?.()
+      // historySub?.unsubscribe?.()
       messageSub?.unsubscribe?.()
       typingSub?.unsubscribe?.()
       readSub?.unsubscribe?.()
     }
-  }, [activeConversationId, connected])
+  }, [activeConversationId, socketService.isConnected()])
 
   const activeConversation = conversations.find(
     (c) => c.id === activeConversationId
@@ -162,14 +181,29 @@ export function ChatContent() {
   // console.log("[v0] Active messages:", activeMessages)
 
   return (
-    <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-70px)] flex flex-col md:grid md:grid-cols-3 gap-0 md:gap-4 p-2 sm:p-4 md:p-6 lg:p-8 md:pb-1 lg:pb-2">
-      {/* Conversations Sidebar */}
-      <div 
-        className={`${
-          showConversationList ? 'flex' : 'hidden'
-        } md:flex flex-col md:col-span-1 space-y-3 overflow-y-auto md:border-r border-border`}
+    <div
+      className="
+        h-[calc(100vh-120px)] md:h-[calc(100vh-70px)]
+        flex flex-col md:grid md:grid-cols-3
+        overflow-hidden
+        gap-0 md:gap-4
+        p-2 sm:p-4 md:p-6 lg:p-8
+        md:pb-1 lg:pb-2
+      "
+    >
+      {/* Sidebar */}
+      <div
+        className={`
+          ${showConversationList ? "flex" : "hidden"}
+          md:flex md:col-span-1
+          flex-col
+          min-h-0
+          overflow-y-auto
+          md:border-r border-border
+          pr-0 md:pr-2
+        `}
       >
-        <div className="flex items-center justify-between pb-2">
+        {/* <div className="flex items-center justify-between pb-2">
           <h2 className="text-lg font-semibold">Messages</h2>
           <button
             onClick={() => setShowConversationList(false)}
@@ -177,22 +211,22 @@ export function ChatContent() {
           >
             ✕
           </button>
-        </div>
+        </div> */}
 
         {conversations.length === 0 ? (
-          <Card className="p-4 text-center text-muted-foreground text-sm md:mr-2 mb-2 md:mb-0">
+          <Card className="p-4 text-center text-muted-foreground text-sm">
             No conversations yet. Search for users to start chatting!
           </Card>
         ) : (
-          <div className="space-y-2 mr-2">
+          <div className="space-y-2">
             {conversations.map((conversation) => (
               <ConversationItem
                 key={conversation.id}
                 conversation={conversation}
                 isActive={activeConversationId === conversation.id}
                 onSelect={() => {
-                  setActiveConversation(conversation.id)
-                  setShowConversationList(false)
+                  setActiveConversation(conversation.id);
+                  setShowConversationList(false);
                 }}
               />
             ))}
@@ -200,10 +234,15 @@ export function ChatContent() {
         )}
       </div>
 
-      {/* Chat Window */}
-      <div className="flex-1 md:col-span-2 flex flex-col min-w-0">
-        {activeConversation ? (
-          <>
+      {/* Chat Column */}
+      <div className={`flex flex-col md:col-span-2 min-h-0 min-w-0 ${!showConversationList ? "h-full" : "" }`}>
+        {activeConversation && (
+          <div className={`
+            ${!showConversationList ? "block" : "hidden"}
+            md:block
+            flex flex-col md:col-span-2 min-h-0 min-w-0 h-full
+          `}>
+            {/* Mobile Back Button */}
             <div className="md:hidden mb-2">
               <button
                 onClick={() => setShowConversationList(true)}
@@ -221,11 +260,15 @@ export function ChatContent() {
               onTyping={(isTyping) =>
                 socketService.setTyping(activeConversation.id, isTyping)
               }
-              isLoading={loadingConversations || loadingMessages.get(activeConversationId)}
+              isLoading={
+                loadingConversations ||
+                loadingMessages.get(activeConversationId)
+              }
             />
-          </>
-        ) : (
-          <Card className="flex items-center justify-center h-full">
+          </div>
+        )}
+        {!activeConversation && (
+          <Card className="hidden md:flex items-center justify-center h-full">
             <p className="text-muted-foreground text-sm">
               Select a conversation to start chatting
             </p>
