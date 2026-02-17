@@ -3,6 +3,7 @@
 import SockJS from 'sockjs-client'
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs'
 import { useChatStore } from '../stores/chatStore'
+import { useSocketStore } from '../stores/socketStore'
 
 const WS_URL =
   (process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8080') + '/ws'
@@ -42,7 +43,8 @@ class SocketService {
       this.stompClient.onConnect = () => {
         console.log('[Socket] Connected')
         this.connected = true
-        this.subscribeToUserStatus()
+        useSocketStore.getState().setConnected(true)
+        this.subscribeToPresence()
         resolve()
       }
 
@@ -53,6 +55,7 @@ class SocketService {
 
       this.stompClient.onWebSocketClose = () => {
         console.log('[Socket] Disconnected')
+        useSocketStore.getState().setConnected(false)
         this.connected = false
       }
 
@@ -69,9 +72,9 @@ class SocketService {
     }
   }
 
-  isConnected(): boolean {
-    return this.connected
-  }
+  // isConnected(): boolean {
+  //   return this.connected
+  // }
 
   // ===============================
   // SUBSCRIBE (NO CACHING)
@@ -158,17 +161,19 @@ class SocketService {
   // SUBSCRIPTION HELPERS
   // ===============================
 
-  subscribeToUserStatus() {
+  subscribeToPresence() {
     if (!this.stompClient) return
-
-    this.stompClient.subscribe("/topic/user-status", (message) => {
-      const data = JSON.parse(message.body)
-
-      useChatStore.getState().updateUserStatus(
-        data.username,
-        data.online
-      )
-    })
+  
+    return this.stompClient.subscribe(
+      "/user/queue/presence",
+      (message) => {
+        const data = JSON.parse(message.body)
+        console.log('------------------>>>>>>>>>>>>>>>>>',data)
+        useChatStore
+          .getState()
+          .updateUserStatus(data.username, data.online)
+      }
+    )
   }
 
   subscribeToUserMessages(callback: (data: any) => void) {

@@ -9,6 +9,7 @@ import { ChatWindow } from './ChatWindow'
 import { socketService } from '@/lib/services/socket'
 import { apiService } from '@/lib/services/api'
 import { toast } from 'sonner'
+import { useSocketStore } from '@/lib/stores/socketStore'
 
 export function ChatContent() {
   const { user } = useAuth()
@@ -22,6 +23,7 @@ export function ChatContent() {
     setConversations,
     updateConversationLastMessage,
     updateConversationUnreadCount,
+    updateUserStatus,
     setActiveConversation,
     addMessage,
     addMessages,
@@ -32,50 +34,56 @@ export function ChatContent() {
   
   // const [connected, setConnected] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const isConnected = useSocketStore((state) => state.isConnected)
+ 
   
+  //   const initSocket = async () => {
+  //     try {
+  //       // await socketService.connect()
+  //       // setConnected(true)
+  //       console.log("WebSocket Connected")
+  //       fetchConversations() // fetch after socket connects
+  //     } catch (error) {
+  //       console.error("WebSocket connection failed:", error)
+  //       toast.error("Failed to connect to chat service")
+  //     }
+  //   }
+  
+  //   initSocket()
+  
+  //   return () => {
+  //     // socketService.disconnect()
+  //     // setConnected(false)
+  //     console.log("WebSocket Disconnected")
+  //   }
+ 
   useEffect(() => {
     setMounted(true)
-  
-    const initSocket = async () => {
+    const fetchConversations = async () => {
+      setLoadingConversations(true)
+    
       try {
-        // await socketService.connect()
-        // setConnected(true)
-        console.log("WebSocket Connected")
-        fetchConversations() // fetch after socket connects
-      } catch (error) {
-        console.error("WebSocket connection failed:", error)
-        toast.error("Failed to connect to chat service")
+        const res = await apiService.getConversations()
+    
+        if (res?.data?.success) {
+          setConversations(res.data.data)
+        }
+      } catch (err) {
+        console.error("Fetch conversations failed:", err)
+        toast.error("Failed to load conversations")
+      } finally {
+        setLoadingConversations(false)
       }
     }
-  
-    initSocket()
+    fetchConversations()
   
     return () => {
-      // socketService.disconnect()
-      // setConnected(false)
-      console.log("WebSocket Disconnected")
+      setMounted(false)
     }
   }, [])
 
-  const fetchConversations = async () => {
-    setLoadingConversations(true)
-  
-    try {
-      const res = await apiService.getConversations()
-  
-      if (res?.data?.success) {
-        setConversations(res.data.data)
-      }
-    } catch (err) {
-      console.error("Fetch conversations failed:", err)
-      toast.error("Failed to load conversations")
-    } finally {
-      setLoadingConversations(false)
-    }
-  }
-
   useEffect(() => {
-    if (!socketService.isConnected()) return;
+    if (!isConnected) return;
   
     const historySub = socketService.subscribeToUserMessages((data: any) => {
       if (
@@ -91,13 +99,13 @@ export function ChatContent() {
       historySub?.unsubscribe?.()
     }
   
-  }, [socketService.isConnected()])
+  }, [isConnected])
   
   const [showConversationList, setShowConversationList] = useState(true)
   // const subscriptionsRef = useRef<Map<string, any>>(new Map())
 
   useEffect(() => {
-    if (!activeConversationId || !socketService.isConnected()) return
+    if (!activeConversationId || !isConnected) return
   
     const conversationId = activeConversationId
   
@@ -163,7 +171,7 @@ export function ChatContent() {
       typingSub?.unsubscribe?.()
       readSub?.unsubscribe?.()
     }
-  }, [activeConversationId, socketService.isConnected()])
+  }, [activeConversationId, isConnected])
 
   const activeConversation = conversations.find(
     (c) => c.id === activeConversationId

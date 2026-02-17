@@ -38,7 +38,7 @@ interface ChatState {
   addMessage: (message: Message) => void
   addMessages: (conversationId: string, messages: Message[]) => void
   setTyping: (conversationId: string, userName: string, isTyping: boolean) => void
-  setUserOnline: (userId: string, isOnline: boolean) => void
+  // setUserOnline: (userId: string, isOnline: boolean) => void
   updateConversationLastMessage: (conversationId: string, message: string, timestamp: string) => void
   clearMessages: (conversationId: string) => void
   setLoadingConversations: (loading: boolean) => void
@@ -100,18 +100,18 @@ export const useChatStore = create<ChatState>((set) => ({
       }
     }),
 
-  setUserOnline: (userId, isOnline) =>
-    set((state) => {
-      const newSet = new Set(state.onlineUsers)
-      if (isOnline) {
-        newSet.add(userId)
-      } else {
-        newSet.delete(userId)
-      }
-      return {
-        onlineUsers: newSet,
-      }
-    }),
+  // setUserOnline: (userId, isOnline) =>
+  //   set((state) => {
+  //     const newSet = new Set(state.onlineUsers)
+  //     if (isOnline) {
+  //       newSet.add(userId)
+  //     } else {
+  //       newSet.delete(userId)
+  //     }
+  //     return {
+  //       onlineUsers: newSet,
+  //     }
+  //   }),
 
   updateConversationLastMessage: (conversationId, message, timestamp) =>
     set((state) => {
