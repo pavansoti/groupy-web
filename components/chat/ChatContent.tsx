@@ -256,7 +256,7 @@ export function ChatContent() {
             <div className="md:hidden mb-2">
               <button
                 onClick={() => setShowConversationList(true)}
-                className="text-sm font-semibold text-muted-foreground hover:text-foreground"
+                className="text-md font-semibold text-muted-foreground hover:text-foreground"
               >
                 ← Back to conversations
               </button>
