@@ -72,7 +72,7 @@ export function ChatWindow({
               {conversation.participantUsername}
             </p>
             <p className="text-xs text-muted-foreground">
-              {conversation.isOnline ? "🟢 Online" : "⚪ Offline"}
+              {conversation.online ? "🟢 Online" : "⚪ Offline"}
             </p>
           </div>
         </div>

@@ -41,7 +41,7 @@ export function ConversationItem({ conversation, isActive = false, onSelect }: C
           ) : (
             conversation.participantUsername.charAt(0).toUpperCase()
           )}
-          {conversation.isOnline && (
+          {conversation.online && (
             <div className="absolute bottom-0 right-0 h-2 w-2 sm:h-2.5 sm:w-2.5 bg-green-500 rounded-full border border-background"></div>
           )}
         </div>

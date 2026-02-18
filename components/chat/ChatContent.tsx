@@ -112,6 +112,8 @@ export function ChatContent() {
     console.log("Subscribing to:", conversationId)
   
     setLoadingMessages(conversationId, true)
+
+    updateConversationUnreadCount(conversationId, 0)
   
     // MUST JOIN CONVERSATION (THIS WAS MISSING)
     socketService.joinConversation(conversationId)
