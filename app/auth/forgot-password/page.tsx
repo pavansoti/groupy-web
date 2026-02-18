@@ -1,8 +1,8 @@
 import { ForgotPasswordForm } from '@/components/auth/ForgotPasswordForm'
 
 export const metadata = {
-  title: 'Forgot Password - InstaChat',
-  description: 'Reset your InstaChat password',
+  title: 'Forgot Password - GroupyChat',
+  description: 'Reset your GroupyChat password',
 }
 
 export default function ForgotPasswordPage() {

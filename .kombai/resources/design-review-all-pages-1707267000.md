@@ -6,7 +6,7 @@
 
 ## Summary
 
-The InstaChat application has a solid foundational structure with proper use of shadcn components and Tailwind CSS, but several critical UI/UX issues need immediate attention. The main problems include broken layout (sidebar not visible, mobile nav appearing on desktop), accessibility violations (color contrast, missing landmarks), and inconsistent styling across components. The auth pages lack proper centering and card wrappers, while the file upload uses native browser styling instead of custom components.
+The GroupyChat application has a solid foundational structure with proper use of shadcn components and Tailwind CSS, but several critical UI/UX issues need immediate attention. The main problems include broken layout (sidebar not visible, mobile nav appearing on desktop), accessibility violations (color contrast, missing landmarks), and inconsistent styling across components. The auth pages lack proper centering and card wrappers, while the file upload uses native browser styling instead of custom components.
 
 ## Import Issues Fixed
 

@@ -33,7 +33,7 @@ function NavbarContent() {
         <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/feed" className="flex items-center gap-2 font-bold text-xl">
             <div className="h-8 w-8 rounded-full bg-primary"></div>
-            <span className="hidden sm:inline">InstaChat</span>
+            <span className="hidden sm:inline">GroupyChat</span>
           </Link>
           <div className="h-10 w-10 bg-muted rounded-full"></div>
         </div>
@@ -46,7 +46,7 @@ function NavbarContent() {
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/feed" className="flex items-center gap-2 font-bold text-xl">
           <div className="h-8 w-8 rounded-full bg-primary"></div>
-          <span className="hidden sm:inline">InstaChat</span>
+          <span className="hidden sm:inline">GroupyChat</span>
         </Link>
 
         <div className="flex items-center gap-2">

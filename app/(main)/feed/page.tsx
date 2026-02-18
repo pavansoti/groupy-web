@@ -1,7 +1,7 @@
 import { FeedContent } from '@/components/feed/FeedContent'
 
 export const metadata = {
-  title: 'Feed - InstaChat',
+  title: 'Feed - GroupyChat',
   description: 'Your feed with posts from users you follow',
 }
 
