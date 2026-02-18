@@ -22,7 +22,7 @@ export default function SearchPage() {
     <div className="space-y-6 max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
       <div className="space-y-2">
         <h1 className="text-3xl font-bold text-foreground">Search Users</h1>
-        <p className="text-muted-foreground">Find and follow users on InstaChat</p>
+        <p className="text-muted-foreground">Find and follow users on GroupyChat</p>
       </div>
 
       <SearchInput onResultSelect={handleSelectResult} />

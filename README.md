@@ -1,4 +1,4 @@
-# InstaChat - Instagram-like Real-time Chat Application
+# GroupyChat - Instagram-like Real-time Chat Application
 
 A production-ready Instagram-like web application with real-time messaging, social features, and modern UI built with Next.js, TypeScript, and React.
 
@@ -335,7 +335,7 @@ MIT License - feel free to use this project for personal or commercial purposes.
 
 ## Support
 
-For issues and feature requests, please create an issue in the repository or contact support at [support@instachat.app](mailto:support@instachat.app)
+For issues and feature requests, please create an issue in the repository or contact support at [support@groupychat.app](mailto:support@groupychat.app)
 
 ---
 

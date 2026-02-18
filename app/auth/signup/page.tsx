@@ -1,8 +1,8 @@
 import { SignupForm } from '@/components/auth/SignupForm'
 
 export const metadata = {
-  title: 'Sign Up - InstaChat',
-  description: 'Create your InstaChat account',
+  title: 'Sign Up - GroupyChat',
+  description: 'Create your GroupyChat account',
 }
 
 export default function SignupPage() {
