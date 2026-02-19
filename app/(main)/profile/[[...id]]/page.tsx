@@ -44,7 +44,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!userIdToFetch) {
-      setError('User not found')
+      // setError('User not found')
       return
     }
 
@@ -85,18 +85,6 @@ export default function ProfilePage() {
   // Check if this is the current user's profile
   const isCurrentUser = currentUser && user && String(currentUser.id) === String(user.id)
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen w-full">
-        <div className="max-w-4xl mx-auto p-4 sm:p-6">
-          <Card className="p-8 text-center">
-            <p className="text-muted-foreground">Loading profile...</p>
-          </Card>
-        </div>
-      </div>
-    )
-  }
-
   if (error) {
     return (
       <div className="min-h-screen w-full">
@@ -109,30 +97,23 @@ export default function ProfilePage() {
     )
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen w-full">
-        <div className="max-w-4xl mx-auto p-4 sm:p-6">
-          <Card className="p-8 text-center">
-            <p className="text-muted-foreground">User not found</p>
-          </Card>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="w-full">
       {/* Profile Header Section */}
       <div className="border-b border-border">
         <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-          <ProfileHeader user={user} isCurrentUser={isCurrentUser} onUserUpdate={handleUserUpdate}/>
+          <ProfileHeader 
+            user={user} 
+            isCurrentUser={isCurrentUser} 
+            onUserUpdate={handleUserUpdate}
+            isLoading={isLoading}
+          />
         </div>
       </div>
 
       {/* Tabs and Posts Section */}
       <div className="max-w-4xl mx-auto">
-        <ProfileTabs user={user} isCurrentUser={isCurrentUser} onPostDeleted={handlePostDeleted}/>
+        <ProfileTabs userId={userIdToFetch} isCurrentUser={isCurrentUser} onPostDeleted={handlePostDeleted}/>
       </div>
     </div>
   )

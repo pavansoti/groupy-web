@@ -22,7 +22,7 @@ import { ProfileHeaderSkeleton } from '@/components/skeletons'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useRouter } from 'next/navigation'
 interface ProfileHeaderProps {
-  user: User
+  user?: User
   isCurrentUser: boolean
   onUserUpdate: (user: User) => void
   isLoading?: boolean
@@ -30,25 +30,18 @@ interface ProfileHeaderProps {
 
 export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = false }: ProfileHeaderProps) {
   const router = useRouter()
-
-  if (isLoading) {
-    return <ProfileHeaderSkeleton />
-  }
-
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [isUploading, setIsUploading] = useState(false)
-  const [isFollowing, setIsFollowing] = useState(user.following ?? false)
+  const [isFollowing, setIsFollowing] = useState(false)
   const [isFollowLoading, setIsFollowLoading] = useState(false)
 
   // Bio states
   const [isEditingBio, setIsEditingBio] = useState(false)
-  const [bioValue, setBioValue] = useState(user.bio || '')
+  const [bioValue, setBioValue] = useState('')
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
-  const [profilePicUrl, setProfilePicUrl] = useState<string | null>(
-    getImageUrl(user.imageUrl)
-  )
+  const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null)
 
   const { setUser: setAuthUser } = useAuthStore()
   const {
@@ -57,15 +50,27 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = f
     setConversations,
   } = useChatStore()
 
+  // Keep bio in sync if user changes
+  useEffect(() => {
+    setProfilePicUrl(getImageUrl(user?.imageUrl))
+  }, [user?.imageUrl])
+
+  useEffect(() => {
+    setBioValue(user?.bio || '')
+  }, [user?.bio])
+
+  useEffect(() => {
+    setIsFollowing(user?.following || false)
+  }, [user?.following])
+
+  if (isLoading || !user) {
+    return <ProfileHeaderSkeleton />
+  }
+
   const joinDate = new Date(user.createdAt).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
   })
-
-  // Keep bio in sync if user changes
-  useEffect(() => {
-    setBioValue(user.bio || '')
-  }, [user.bio])
 
   /* ---------------- PROFILE PIC ---------------- */
 

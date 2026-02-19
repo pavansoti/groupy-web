@@ -10,7 +10,7 @@ import { PostGridSkeleton } from '@/components/skeletons'
 import { LIMIT } from '@/lib/constants'
 
 interface ProfileTabsProps {
-  user: User
+  userId: string | number
   isCurrentUser: boolean
   onPostDeleted: () => void
 }
@@ -24,13 +24,11 @@ interface Tab {
   show: boolean
 }
 
-export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }: ProfileTabsProps) {
+export function ProfileTabs({ userId, isCurrentUser, onPostDeleted }: ProfileTabsProps) {
   const [activeTab, setActiveTab] = useState<TabId>('posts')
-  // const [user, setUser] = useState<User>(initialUser)
   const [posts, setPosts] = useState<Post[]>([])  
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
-  // const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
   const [isFetchingMore, setIsFetchingMore] = useState(false)
 
@@ -41,6 +39,8 @@ export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }:
 
   const fetchData = useCallback(
     async (tab: TabId, nextPage: number, isLoadMore = false) => {
+      if (!userId) return
+
       const currentRequestId = ++requestIdRef.current
 
       try {
@@ -53,7 +53,7 @@ export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }:
         let res = null
   
         if (tab === 'posts') {
-          res = await apiService.getFeeds(initialUser.id, LIMIT, nextPage)
+          res = await apiService.getFeeds(userId, LIMIT, nextPage)
         } else if (tab === 'liked') {
           res = await apiService.getLikedPosts(LIMIT, nextPage)
         }
@@ -88,9 +88,8 @@ export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }:
         }
       }
     },
-    [initialUser.id]
+    [userId]
   )
-
 
   useEffect(() => {
     // invalidate old requests
@@ -101,7 +100,7 @@ export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }:
     setHasMore(true)
   
     fetchData(activeTab, 0, false)
-  }, [activeTab])
+  }, [activeTab, fetchData])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -236,7 +235,7 @@ export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }:
           <PostsGrid
             activeTab={activeTab}
             posts={posts}
-            // isCurrentUserProfile={isCurrentUser}
+            isCurrentUserProfile={isCurrentUser}
             setPosts={setPosts}
             isLoading={isLoading}
             isFetchingMore={isFetchingMore}
@@ -257,7 +256,7 @@ export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }:
 function PostsGrid({
   activeTab,
   posts,
-  // isCurrentUserProfile,
+  isCurrentUserProfile,
   setPosts,
   isLoading,
   isFetchingMore,
@@ -267,7 +266,7 @@ function PostsGrid({
 }: {
   activeTab: string
   posts: Post[]
-  // isCurrentUserProfile: boolean
+  isCurrentUserProfile: boolean
   setPosts: React.Dispatch<React.SetStateAction<Post[]>>
   isLoading: boolean
   isFetchingMore: boolean
@@ -318,6 +317,7 @@ function PostsGrid({
           <PostItem
             key={post.id}
             activeTab={activeTab}
+            isCurrentUserProfile={isCurrentUserProfile}
             post={post}
             onDelete={handleDeleteFromUI}
             onUnlike={handleUnlike}

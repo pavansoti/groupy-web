@@ -29,7 +29,7 @@ export function ProfileHeaderSkeleton() {
       </div>
 
       {/* Stats */}
-      <div className="flex gap-8 border-t pt-4">
+      <div className="flex justify-evenly sm:justify-start gap-8 border-t pt-4">
         {Array.from({ length: 3 }).map((_, i) => (
           <div key={i} className="space-y-1">
             <Skeleton className="h-6 w-8" />

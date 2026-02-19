@@ -21,13 +21,13 @@ import {
 interface PostItemProps {
   activeTab: string
   post: Post
-  // isCurrentUserProfile: boolean
+  isCurrentUserProfile: boolean
   onDelete: (postId: string | number) => void
   onUnlike?: (postId: string | number) => void
   onUnsaved?: (postId: string | number) => void  
 }
 
-export function PostItem({ activeTab, post, onDelete, onUnlike, onUnsaved }: PostItemProps) {
+export function PostItem({ activeTab, post, isCurrentUserProfile, onDelete, onUnlike, onUnsaved }: PostItemProps) {
   const imageSrc = getImageUrl(post.imageUrl)
 
   const [liked, setLiked] = useState(post.likedByCurrentUser ?? false)
@@ -105,7 +105,7 @@ export function PostItem({ activeTab, post, onDelete, onUnlike, onUnsaved }: Pos
         </button>
 
         {/* DELETE (self profile only) */}
-        {activeTab === 'posts' && (
+        {isCurrentUserProfile && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <button
