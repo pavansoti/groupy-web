@@ -35,15 +35,14 @@ export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }:
   const [isFetchingMore, setIsFetchingMore] = useState(false)
 
   const observerRef = useRef<HTMLDivElement | null>(null)
-  const fetchingRef = useRef(false)
   const pageRef = useRef(0)
 
+  const requestIdRef = useRef(0)
+
   const fetchData = useCallback(
-    async (nextPage: number, isLoadMore = false) => {
-      if (fetchingRef.current) return
-  
-      fetchingRef.current = true
-  
+    async (tab: TabId, nextPage: number, isLoadMore = false) => {
+      const currentRequestId = ++requestIdRef.current
+
       try {
         if (isLoadMore) {
           setIsFetchingMore(true)
@@ -53,12 +52,16 @@ export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }:
   
         let res = null
   
-        if (activeTab === 'posts') {
+        if (tab === 'posts') {
           res = await apiService.getFeeds(initialUser.id, LIMIT, nextPage)
-        } else if (activeTab === 'liked') {
+        } else if (tab === 'liked') {
           res = await apiService.getLikedPosts(LIMIT, nextPage)
         }
   
+
+        // Ignore old responses
+        if (currentRequestId !== requestIdRef.current) return
+
         if (res?.data?.success) {
           const data = res.data.data
   
@@ -75,26 +78,29 @@ export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }:
           } else {
             setPosts(data.content)
           }
-  
-          // setPage(nextPage)
         }
       } catch (err) {
-        console.error('Pagination fetch failed', err)
+        console.error(err)
       } finally {
-        setIsLoading(false)
-        setIsFetchingMore(false)
-        fetchingRef.current = false
+        if (currentRequestId === requestIdRef.current) {
+          setIsLoading(false)
+          setIsFetchingMore(false)
+        }
       }
     },
-    [activeTab, initialUser.id, hasMore]
+    [initialUser.id]
   )
 
+
   useEffect(() => {
+    // invalidate old requests
+    requestIdRef.current++
+
     setPosts([])
     pageRef.current = 0
     setHasMore(true)
   
-    fetchData(0, false)
+    fetchData(activeTab, 0, false)
   }, [activeTab])
 
   useEffect(() => {
@@ -110,7 +116,7 @@ export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }:
         ) {
           const nextPage = pageRef.current + 1
           pageRef.current = nextPage
-          fetchData(nextPage, true)
+          fetchData(activeTab, nextPage, true)
         }
       },
       {
@@ -127,7 +133,7 @@ export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }:
       if (current) observer.unobserve(current)
       observer.disconnect()
     }
-  }, [fetchData, hasMore, isLoading, isFetchingMore])
+  }, [activeTab, hasMore, isLoading, isFetchingMore, fetchData])
 
   // useEffect(() => {
 
