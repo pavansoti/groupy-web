@@ -188,27 +188,44 @@ export function ProfileTabs({ user: initialUser, isCurrentUser, onPostDeleted }:
       {/* Tab Navigation */}
       <div className="sticky top-0 backdrop-blur z-10 border-b border-border">
         <div className="max-w-4xl mx-auto">
-          <div className="flex justify-evenly sm:justify-start items-center">
-            {visibleTabs.map((tab) => (
+          <div className="relative flex items-center">
+
+            {visibleTabs.map((tab, index) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === tab.id
-                    ? 'border-foreground text-foreground'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+                className={`
+                  w-1/3 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors
+                  ${
+                    activeTab === tab.id
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }
+                `}
               >
                 {tab.icon}
                 {tab.label}
               </button>
             ))}
+
+            {/* Sliding underline */}
+            <span
+              className={`
+                absolute bottom-0 left-0 h-[2px] w-1/3 bg-foreground
+                transition-transform duration-300 ease-in-out
+              `}
+              style={{
+                transform: `translateX(${
+                  visibleTabs.findIndex(tab => tab.id === activeTab) * 100
+                }%)`,
+              }}
+            />
           </div>
         </div>
       </div>
 
       {/* Tab Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+      <div className="max-w-4xl mx-auto px-1">
         {/* {activeTab === 'posts' && ( */}
           <PostsGrid
             activeTab={activeTab}
@@ -254,7 +271,7 @@ function PostsGrid({
 }) {
 
   if (isLoading) {
-    return <PostGridSkeleton className='py-6'/>
+    return <PostGridSkeleton className='py-1'/>
   }
 
   if (!posts || posts.length === 0) {
@@ -289,7 +306,7 @@ function PostsGrid({
   }
 
   return (
-    <div className='py-6'>
+    <div className='py-1'>
       <div className="grid grid-cols-3 gap-1 sm:gap-2">
         {posts.map((post) => (
           <PostItem
