@@ -154,8 +154,8 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
           <div
             className={`rounded-lg px-3 sm:px-4 py-2 ${
               isOwn
-                ? isVoiceAudio || isMusicAudio|| isVideo || isImage ?'text-primary-foreground' : 'bg-primary text-primary-foreground'
-                : 'bg-muted'
+                ? isVoiceAudio || isMusicAudio|| isVideo || isImage ? 'text-primary-foreground' : 'bg-primary text-primary-foreground'
+                : isVoiceAudio ? '' : 'bg-muted'
             }`}
           >
             {/* -------- File -------- */}
@@ -214,18 +214,23 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
 
             {/* -------- Voice Audio -------- */}
             {isVoiceAudio && (
-              <div className="flex items-center gap-3 bg-primary/10 px-4 py-2 rounded-full w-[18rem]">
+              // <div className="flex items-center gap-3 bg-primary/10 px-4 py-2 rounded-full w-[18rem]">
                 
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white">
-                  🎤
-                </div>
+              //   <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white">
+              //     🎤
+              //   </div>
 
-                <audio
-                  controls
-                  src={mediaUrl}
-                  className="flex-1 h-8"
-                />
-              </div>
+              //   <audio
+              //     controls
+              //     src={mediaUrl}
+              //     className="flex-1 h-8"
+              //   />
+              // </div>
+              <audio
+                controls
+                src={mediaUrl}
+                className="h-10 w-[18rem]"
+              />
             )}
 
             {/* -------- Music Audio -------- */}
