@@ -207,9 +207,9 @@ export function ChatContent() {
           ${showConversationList ? "flex" : "hidden"}
           lg:flex lg:col-span-1
           flex-col
-          min-h-0
+          min-h-0 min-w-0
           overflow-y-auto
-          md:border-r border-border
+          lg:border-r border-border
           pr-0 md:pr-2
         `}
       >
@@ -228,7 +228,7 @@ export function ChatContent() {
             No conversations yet. Search for users to start chatting!
           </Card>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2 w-full">
             {conversations.map((conversation) => (
               <ConversationItem
                 key={conversation.id}
@@ -278,7 +278,7 @@ export function ChatContent() {
           </div>
         )}
         {!activeConversation && (
-          <Card className="hidden md:flex items-center justify-center h-full">
+          <Card className="hidden lg:flex items-center justify-center h-full">
             <p className="text-muted-foreground text-sm">
               Select a conversation to start chatting
             </p>

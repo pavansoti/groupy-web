@@ -30,7 +30,7 @@ export function ConversationItem({ conversation, isActive = false, onSelect }: C
         isActive ? 'bg-primary/10 border border-primary' : 'bg-primary/5 hover:bg-muted'
       )}
     >
-      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 overflow-hidden">
         <div className="h-10 w-10 rounded-full bg-primary/50 flex-shrink-0 flex items-center justify-center text-xs sm:text-sm font-semibold relative">
           {conversation.participantProfilePicture ? (
             <img
@@ -46,11 +46,11 @@ export function ConversationItem({ conversation, isActive = false, onSelect }: C
           )}
         </div>
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 w-0">
           <p className="font-semibold text-foreground truncate text-lg">
             {conversation.participantUsername}
           </p>
-          <p className="text-xs text-muted-foreground truncate flex items-center gap-1">
+          <p className="text-xs text-muted-foreground truncate">
             {isTyping ? (
               <span className="text-blue-500">typing...</span>
             ) : (() => {
