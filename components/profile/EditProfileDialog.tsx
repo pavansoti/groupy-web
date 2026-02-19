@@ -87,7 +87,7 @@ export function EditProfileDialog({
         username: data.username,
         email: data.email,
         bio: data.bio || '',
-        gender: data.gender || '',
+        gender: data.gender || null,
         privateAccount: data.privateAccount,
       }
 
