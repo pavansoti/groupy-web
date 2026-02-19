@@ -264,8 +264,8 @@ export function ChatContent() {
             <ChatWindow
               conversation={activeConversation}
               messages={activeMessages}
-              onSendMessage={(message) =>
-                socketService.sendMessage(activeConversation.id, message)
+              onSendMessage={(message, type) =>
+                socketService.sendMessage(activeConversation.id, message, type)
               }
               onTyping={(isTyping) =>
                 socketService.setTyping(activeConversation.id, isTyping)

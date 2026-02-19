@@ -9,11 +9,12 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { socketService as ws } from '@/lib/services/socket'
 import './chat.css';
 import { toast } from 'sonner'
+import { MessageType } from '@/lib/schemas/chat'
 
 interface ChatWindowProps {
   conversation: Conversation
   messages: Message[]
-  onSendMessage: (message: string) => void
+  onSendMessage: (message: string, type: MessageType) => void
   onTyping?: (isTyping: boolean) => void
   isLoading?: boolean
 }

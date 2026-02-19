@@ -234,6 +234,17 @@ class ApiService {
   async createConversation(userId: string) {
     return this.api.post(`api/conversations/${userId}`, { userId })
   }
+
+  async uploadFile(file: File): Promise<any> {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    return this.api.post(`/api/conversations/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+  }
 }
 
 export const apiService = new ApiService()

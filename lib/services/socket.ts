@@ -4,6 +4,7 @@ import SockJS from 'sockjs-client'
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs'
 import { useChatStore } from '../stores/chatStore'
 import { useSocketStore } from '../stores/socketStore'
+import { MessageType } from '../schemas/chat'
 
 const WS_URL =
   (process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8080') + '/ws'
@@ -135,7 +136,7 @@ class SocketService {
   sendMessage(
     conversationId: string,
     content: string,
-    type: 'text' | 'file' | 'audio' = 'text'
+    type: MessageType = 'text'
   ) {
     this.send('/app/chat.send', {
       conversationId,
