@@ -194,7 +194,7 @@ export function ChatContent() {
     <div
       className="
         h-[calc(100vh-120px)] md:h-[calc(100vh-70px)]
-        flex flex-col md:grid md:grid-cols-3
+        flex flex-col lg:grid lg:grid-cols-3
         overflow-hidden
         gap-0 md:gap-4
         p-2 sm:p-4 md:p-6 lg:p-8
@@ -205,11 +205,11 @@ export function ChatContent() {
       <div
         className={`
           ${showConversationList ? "flex" : "hidden"}
-          md:flex md:col-span-1
+          lg:flex lg:col-span-1
           flex-col
-          min-h-0
+          min-h-0 min-w-0
           overflow-y-auto
-          md:border-r border-border
+          lg:border-r border-border
           pr-0 md:pr-2
         `}
       >
@@ -228,7 +228,7 @@ export function ChatContent() {
             No conversations yet. Search for users to start chatting!
           </Card>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2 w-full">
             {conversations.map((conversation) => (
               <ConversationItem
                 key={conversation.id}
@@ -249,14 +249,14 @@ export function ChatContent() {
         {activeConversation && (
           <div className={`
             ${!showConversationList ? "block" : "hidden"}
-            md:block
+            lg:block
             flex flex-col md:col-span-2 min-h-0 min-w-0 h-full
           `}>
             {/* Mobile Back Button */}
-            <div className="md:hidden mb-2">
+            <div className="lg:hidden mb-2">
               <button
                 onClick={() => setShowConversationList(true)}
-                className="text-md font-semibold text-muted-foreground hover:text-foreground"
+                className="font-semibold text-muted-foreground hover:text-foreground"
               >
                 ← Back to conversations
               </button>
@@ -278,7 +278,7 @@ export function ChatContent() {
           </div>
         )}
         {!activeConversation && (
-          <Card className="hidden md:flex items-center justify-center h-full">
+          <Card className="hidden lg:flex items-center justify-center h-full">
             <p className="text-muted-foreground text-sm">
               Select a conversation to start chatting
             </p>

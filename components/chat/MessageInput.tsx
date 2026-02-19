@@ -32,6 +32,7 @@ export function MessageInput({ onSend, onTyping, isLoading = false }: MessageInp
   const contentValue = watch('content')
   const [showMobileActions, setShowMobileActions] = useState(false)
   const emojiRef = useRef<HTMLDivElement | null>(null)
+  const mobileActionsRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (!showEmojiPicker) return
@@ -44,7 +45,10 @@ export function MessageInput({ onSend, onTyping, isLoading = false }: MessageInp
   
     const handleClickOutside = (e: MouseEvent) => {
       if (emojiRef.current && !emojiRef.current.contains(e.target as Node)) {
-        setShowEmojiPicker(false)
+        const target = e.target as Element
+        if (!target.closest('[data-testid="emoji-button"]')) {
+          setShowEmojiPicker(false)
+        }
       }
     }
   
@@ -56,6 +60,36 @@ export function MessageInput({ onSend, onTyping, isLoading = false }: MessageInp
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [showEmojiPicker])  
+
+  useEffect(() => {
+    if (!showMobileActions) return
+  
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowMobileActions(false)
+      }
+    }
+  
+    const handleClickOutside = (e: MouseEvent) => {
+      if (mobileActionsRef.current && !mobileActionsRef.current.contains(e.target as Node)) {
+        // Also check that the click is not on the plus button that opens the menu
+        // by checking if the target or its parent has the id "plus-button"
+        const target = e.target as Element
+        if (!target.closest('[data-testid="plus-button"]')) {
+          setShowMobileActions(false)
+        }
+
+      }
+    }
+  
+    document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('mousedown', handleClickOutside)
+  
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showMobileActions])  
 
   const onSubmit = async (data: SendMessageFormData) => {
     if (!data.content.trim()) {
@@ -212,11 +246,12 @@ export function MessageInput({ onSend, onTyping, isLoading = false }: MessageInp
 
       {/* Mobile Action Sheet */}
       {showMobileActions && (
-        <div className="sm:hidden absolute bottom-16 left-0 right-0 bg-background border border-border rounded-xl p-3 shadow-xl flex justify-around animate-in slide-in-from-bottom-5">
+        <div ref={mobileActionsRef} className="sm:hidden absolute bottom-16 left-0 right-0 bg-background border border-border rounded-xl p-3 shadow-xl flex justify-around animate-in slide-in-from-bottom-5">
           <Button
             type="button"
             variant="ghost"
             size="icon"
+            data-testid="emoji-button"
             onClick={() => {
               setShowEmojiPicker(true)
               setShowMobileActions(false)
@@ -258,6 +293,7 @@ export function MessageInput({ onSend, onTyping, isLoading = false }: MessageInp
           size="icon"
           onClick={() => setShowMobileActions(!showMobileActions)}
           className="sm:hidden"
+          data-testid="plus-button"
         >
           <Plus className="h-5 w-5" />
         </Button>
@@ -271,6 +307,7 @@ export function MessageInput({ onSend, onTyping, isLoading = false }: MessageInp
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
             disabled={isLoading}
             title="Add emoji"
+            data-testid="emoji-button"
           >
             <Smile className="h-5 w-5" />
           </Button>

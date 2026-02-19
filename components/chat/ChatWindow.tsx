@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { MessageBubble } from './MessageBubble'
 import { MessageInput } from './MessageInput'
 import { Message, Conversation, useChatStore } from '@/lib/stores/chatStore'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { ArrowDown } from 'lucide-react'
 import { socketService as ws } from '@/lib/services/socket'
 import './chat.css';
 import { toast } from 'sonner'
@@ -29,15 +30,29 @@ export function ChatWindow({
   const { user } = useAuth()
   const { typingUsers } = useChatStore()
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    // Only auto-scroll if the user is not scrolled up
+    if (!showScrollToBottom) {
+      scrollToBottom()
+    }
+  }, [messages, showScrollToBottom])
+
+  const handleScroll = () => {
+    const container = scrollContainerRef.current
+    if (container) {
+      const { scrollTop, scrollHeight, clientHeight } = container
+      const isScrolledUp = scrollHeight - scrollTop - clientHeight > 200
+      setShowScrollToBottom(isScrolledUp)
+    }
+  }
   // console.log(conversation)
   // Join conversation and mark as read on mount
   // useEffect(() => {
@@ -50,7 +65,7 @@ export function ChatWindow({
   // }, [conversation?.id])
 
   return (
-    <Card className="flex flex-col h-full w-full min-h-0 gap-0 py-0">
+    <Card className="relative flex flex-col h-full w-full min-h-0 gap-0 py-0">
       {/* Header */}
       <div className="border-b border-border p-4 flex-shrink-0">
         <div className="flex items-center gap-3">
@@ -80,7 +95,11 @@ export function ChatWindow({
       </div>
   
       {/* Messages */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-4 custom-scrollbar flex flex-col">
+      <div
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className="relative flex-1 min-h-0 overflow-y-auto p-4 custom-scrollbar flex flex-col"
+      >
         {isLoading ? (
           <div className="flex flex-1 items-center justify-center">
             <p className="text-muted-foreground text-sm">
@@ -126,6 +145,17 @@ export function ChatWindow({
           </>
         )}
       </div>
+  
+      {showScrollToBottom && (
+        <div className="absolute bottom-[88px] left-1/2 -translate-x-1/2 z-50">
+          <button
+            onClick={scrollToBottom}
+            className="pointer-events-auto bg-primary text-primary-foreground rounded-full p-4 shadow-2xl hover:scale-105 active:scale-95 transition-all"
+          >
+            <ArrowDown className="h-4 w-4" />
+          </button>
+        </div>
+      )}
   
       {/* Input */}
       <div className="border-t border-border p-4 flex-shrink-0">
