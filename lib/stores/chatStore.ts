@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { MessageType } from '../schemas/chat'
 
 export interface Message {
   id: string
@@ -7,7 +8,7 @@ export interface Message {
   senderUsername: string
   senderProfilePicture?: string
   content: string
-  type?: 'text' | 'file' | 'audio'
+  type?: MessageType
   createdAt: string
   isRead: boolean
 }

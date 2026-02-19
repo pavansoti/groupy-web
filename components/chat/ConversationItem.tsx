@@ -26,7 +26,7 @@ export function ConversationItem({ conversation, isActive = false, onSelect }: C
     <button
       onClick={onSelect}
       className={cn(
-        'w-full p-2 sm:p-3 text-left rounded-lg transition-colors flex items-center justify-between gap-2',
+        'w-full p-3 text-left rounded-lg transition-colors flex items-center justify-between gap-2',
         isActive ? 'bg-primary/10 border border-primary' : 'bg-primary/5 hover:bg-muted'
       )}
     >
@@ -50,12 +50,37 @@ export function ConversationItem({ conversation, isActive = false, onSelect }: C
           <p className="font-semibold text-foreground truncate text-sm sm:text-base">
             {conversation.participantUsername}
           </p>
-          <p className="text-xs text-muted-foreground truncate">
+          <p className="text-xs text-muted-foreground truncate flex items-center gap-1">
             {isTyping ? (
               <span className="text-blue-500">typing...</span>
-            ) : (
-              conversation.lastMessage || 'No messages yet'
-            )}
+            ) : (() => {
+                try {
+                  const parsed = JSON.parse(conversation.lastMessage)
+
+                  const fileName = parsed?.fileName || "File"
+                  const type = parsed?.type || ""
+
+                  if (type === 'music_audio') {
+                    return <>🎵 <span className="truncate">{fileName}</span></>
+                  }
+
+                  if (type === 'voice_audio') {
+                    return <>🎤 <span className="truncate">{fileName}</span></>
+                  }
+
+                  if (type === 'image') {
+                    return <>📷 <span className="truncate">{fileName}</span></>
+                  }
+
+                  if (type === 'video') {
+                    return <>🎥 <span className="truncate">{fileName}</span></>
+                  }
+
+                  return <>📎 <span className="truncate">{fileName}</span></>
+                } catch {
+                  return conversation.lastMessage || "No messages yet"
+                }
+              })()}
           </p>
         </div>
       </div>
