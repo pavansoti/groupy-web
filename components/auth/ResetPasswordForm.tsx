@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 import Link from 'next/link'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import { ArrowLeft, EyeOff, Eye, Loader2 } from 'lucide-react'
 import { apiService } from '@/lib/services/api'
 import { resetPasswordSchema, ResetPasswordFormData } from '@/lib/schemas/auth'
 
@@ -21,6 +21,10 @@ export function ResetPasswordForm() {
   // const [isValidatingToken, setIsValidatingToken] = useState(true)
   // const [tokenValid, setTokenValid] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [showPasswords, setShowPasswords] = useState({
+    new: false,
+    confirm: false,
+  })
 
   const token = searchParams.get('token')
 
@@ -84,6 +88,13 @@ export function ResetPasswordForm() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const togglePasswordVisibility = (field: 'new' | 'confirm') => {
+    setShowPasswords(prev => ({
+      ...prev,
+      [field]: !prev[field],
+    }))
   }
 
   // if (isValidatingToken) {
@@ -173,14 +184,28 @@ export function ResetPasswordForm() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="password">New Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              {...register('password')}
-              disabled={isLoading}
-              autoComplete="new-password"
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPasswords.new ? 'text' : 'password'}
+                placeholder="••••••••"
+                {...register('password')}
+                autoComplete="new-password"
+                disabled={isLoading}
+              />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility('new')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                tabIndex={-1}
+              >
+                {showPasswords.new ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
             {errors.password && (
               <p className="text-sm text-destructive">{errors.password.message}</p>
             )}
@@ -188,14 +213,28 @@ export function ResetPasswordForm() {
 
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              placeholder="••••••••"
-              {...register('confirmPassword')}
-              disabled={isLoading}
-              autoComplete="new-password"
-            />
+            <div className="relative">
+              <Input
+                id="confirmPassword"
+                type={showPasswords.confirm ? 'text' : 'password'}
+                placeholder="••••••••"
+                {...register('confirmPassword')}
+                disabled={isLoading}
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility('confirm')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                tabIndex={-1}
+              >
+                {showPasswords.new ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
             {errors.confirmPassword && (
               <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
             )}

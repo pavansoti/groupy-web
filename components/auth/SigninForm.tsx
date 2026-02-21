@@ -19,11 +19,13 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card'
+import { Eye, EyeOff } from 'lucide-react'
 
 export function SigninForm() {
   const router = useRouter()
   const { setUser, setToken } = useAuthStore()
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const {
     register,
@@ -75,7 +77,10 @@ export function SigninForm() {
       setIsLoading(false)
     }
   }
-  
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(prev => !prev)
+  }  
 
   return (
     <Card
@@ -116,13 +121,27 @@ export function SigninForm() {
   
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              {...register('password')}
-              disabled={isLoading}
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="••••••••"
+                {...register('password')}
+                disabled={isLoading}
+              />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility()}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
             {errors.password && (
               <p className="text-sm text-destructive">
                 {errors.password.message}
