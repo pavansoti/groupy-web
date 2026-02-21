@@ -13,11 +13,13 @@ import { useAuthStore } from '@/lib/stores/authStore'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { Eye, EyeOff } from 'lucide-react'
 
 export function SignupForm() {
   const router = useRouter()
   const { setUser, setToken } = useAuthStore()
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const {
     register,
@@ -76,6 +78,10 @@ export function SignupForm() {
     }
   }
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(prev => !prev)
+  }  
+
   return (
     <Card className="
       w-full max-w-sm
@@ -129,13 +135,27 @@ export function SignupForm() {
   
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              {...register('password')}
-              disabled={isLoading}
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="••••••••"
+                {...register('password')}
+                disabled={isLoading}
+              />
+              <button
+                type="button"
+                onClick={() => togglePasswordVisibility()}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
             {errors.password && (
               <p className="text-sm text-destructive">
                 {errors.password.message}
