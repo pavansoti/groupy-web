@@ -164,16 +164,16 @@ class ApiService {
    * Get followers of a user
    * @param userId - The user whose followers to fetch
    */
-  async getFollowers(userId: string) {
-    return this.api.get(`/api/users/${userId}/followers`)
+  async getFollowers(userId: string, page: number = 0,  limit: number = LIMIT) {
+    return this.api.get(`/api/users/${userId}/followers`, { params: { limit, page } })
   }
 
   /**
    * Get users that a user is following
    * @param userId - The user whose following list to fetch
    */
-  async getFollowing(userId: string) {
-    return this.api.get(`/api/users/${userId}/following`)
+  async getFollowing(userId: string, page: number = 0,  limit: number = LIMIT) {
+    return this.api.get(`/api/users/${userId}/following`, { params: { limit, page } })
   }
 
   // Feed endpoints
@@ -200,8 +200,9 @@ class ApiService {
     return this.api.delete(`/api/posts/${postId}`)
   }
 
-  async getPost(postId: string) {
-    return this.api.get(`/posts/${postId}`)
+  //open api
+  async getPostById(postId: string) {
+    return this.api.get(`/api/auth/${postId}`)
   }
 
   // Like endpoints

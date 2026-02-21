@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { apiService } from '@/lib/services/api'
 
-interface SearchResult {
+export interface SearchResult {
   id: string
   username: string
   bio: string

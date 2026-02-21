@@ -1,67 +1,40 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 
 const TOKEN_KEY = process.env.NEXT_PUBLIC_AUTH_TOKEN_KEY || 'auth_token'
-/**
- * AuthProvider - Handles client-side authentication logic
- * 
- * Uses HTTP cookies (industry standard) for storing auth tokens because:
- * - Cookies are secure and can be HttpOnly (prevents XSS)
- * - Automatically sent with API requests
- * - Server can set and validate them
- * - Proper lifetime management
- * - Industry standard for JWT tokens
- * 
- * Why NOT SessionStorage?
- * - Lost on tab close (bad UX)
- * - Vulnerable to XSS (no HttpOnly)
- * - Requires manual request setup
- * - Not suitable for API auth
- */
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
-  // const [isChecking, setIsChecking] = useState(true)
 
   useEffect(() => {
-    // Get token from cookies using utility function
-    // const token = getCookie('token')
     const token = sessionStorage.getItem(TOKEN_KEY)
 
-    // Define public paths that don't require authentication
     const isAuthPage = pathname.startsWith('/auth')
-    // const isResetPasswordPage = pathname.startsWith('/auth/reset-password')
-    const isPublicAsset = pathname.startsWith('/_next') || 
-                         pathname.startsWith('/api') || 
-                         pathname.includes('.')
 
-    // Reset password page doesn't require authentication
-    // if (isResetPasswordPage) {
-    //   setIsChecking(false)
-    //   return
-    // }
+    const isPublicAsset =
+      pathname.startsWith('/_next') ||
+      pathname.startsWith('/api') ||
+      pathname.includes('.')
 
-    // If the user is on an auth page and has a token, redirect to feed
+    // ADD PUBLIC ROUTES HERE
+    const isPublicRoute =
+      pathname.startsWith('/post')
+
+    // If user is on auth page and already logged in
     if (isAuthPage && token) {
-      router.push('/feed')
+      router.replace('/feed')
       return
     }
 
-    // If the user is NOT on an auth page/public asset and has NO token, redirect to signin
-    if (!isAuthPage && !isPublicAsset && !token) {
-      router.push('/auth/signin')
+    // If route is NOT public and no token → redirect
+    if (!isAuthPage && !isPublicAsset && !isPublicRoute && !token) {
+      router.replace('/auth/signin')
       return
     }
-
-    // setIsChecking(false)
   }, [pathname, router])
-
-  // Optionally show loading state while checking auth
-  // if (isChecking) {
-  //   return null
-  // }
 
   return <>{children}</>
 }

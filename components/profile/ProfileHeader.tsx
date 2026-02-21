@@ -21,6 +21,7 @@ import { EditProfileDialog } from './EditProfileDialog'
 import { ProfileHeaderSkeleton } from '@/components/skeletons'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 interface ProfileHeaderProps {
   user?: User
   isCurrentUser: boolean
@@ -341,8 +342,14 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = f
       {/* Stats */}
       <div className="flex justify-evenly sm:justify-start gap-8 border-t pt-4">
         <Stat label="Posts" value={user.postCount || 0} />
-        <Stat label="Followers" value={user.followerCount || 0} />
-        <Stat label="Following" value={user.followingCount || 0} />
+        {/* <Stat label="Followers" value={user.followerCount || 0} />
+        <Stat label="Following" value={user.followingCount || 0} /> */}
+        <Link href={'/follow/following/' + user.id}>  
+          <Stat label="Following" value={user.followingCount || 0} />
+        </Link>
+        <Link href={'/follow/followers/' + user.id}>
+          <Stat label="Followers" value={user.followerCount || 0} />
+        </Link>
       </div>
 
       {/* Edit Profile Dialog */}
