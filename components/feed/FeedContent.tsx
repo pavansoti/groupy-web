@@ -32,12 +32,15 @@ export function FeedContent({ feedsType = "all" }) {
   const [isCreating, setIsCreating] = useState(false)
   const observerRef = useRef<HTMLDivElement | null>(null)
   const fetchingRef = useRef(false) // prevents infinite calls
+  const activeFeedRef = useRef(feedsType)
 
   // Production fetch
   const fetchPosts = useCallback(
     async (offSet: number, isLoadMore = false) => {
       if (fetchingRef.current) return
       fetchingRef.current = true
+
+      const currentFeedType = feedsType
 
       try {
         setIsLoading(true)
@@ -47,6 +50,11 @@ export function FeedContent({ feedsType = "all" }) {
           offSet,
           LIMIT
         )
+
+        // Ignore outdated responses
+        if (activeFeedRef.current !== currentFeedType) {
+          return
+        }
 
         if (response.data?.success) {
           const data = response.data.data
@@ -69,6 +77,10 @@ export function FeedContent({ feedsType = "all" }) {
     },
     [feedsType, setIsLoading, setPosts, addPosts, setHasMore]
   )
+
+  useEffect(() => {
+    activeFeedRef.current = feedsType
+  }, [feedsType])
 
   // Initial load
   useEffect(() => {

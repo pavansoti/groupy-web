@@ -26,7 +26,7 @@ export function ConversationItem({ conversation, isActive = false, onSelect }: C
     <button
       onClick={onSelect}
       className={cn(
-        'w-full p-3 text-left rounded-lg transition-colors flex items-center justify-between gap-2',
+        'w-full p-4 text-left rounded-lg transition-colors flex items-center justify-between gap-2 mb-3',
         isActive ? 'bg-primary/10 border border-primary' : 'bg-primary/5 hover:bg-muted'
       )}
     >
@@ -54,6 +54,7 @@ export function ConversationItem({ conversation, isActive = false, onSelect }: C
             {isTyping ? (
               <span className="text-blue-500">typing...</span>
             ) : (() => {
+                if (!conversation.lastMessage) return "No messages yet"
                 try {
                   const parsed = JSON.parse(conversation.lastMessage)
 

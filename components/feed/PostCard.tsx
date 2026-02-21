@@ -9,6 +9,8 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import { getImageUrl } from '@/lib/utils'
 import { get } from 'http'
+import { toast } from 'sonner'
+import { encryptId } from '@/lib/services/cryptoService'
 
 interface PostCardProps {
   post: Post
@@ -21,6 +23,30 @@ export function PostCard({ post, onLike, onComment, isLoading = false }: PostCar
   const [showComments, setShowComments] = useState(false)
 
   const hasImage = !!post.imageUrl
+
+  const handleShare = async (postId: string | number) => {
+    const encryptedPostId = encryptId(postId.toString())
+
+    if (!encryptedPostId) return
+
+    const shareUrl = `${window.location.origin}/post/${encodeURIComponent(encryptedPostId)}`
+  
+    try {
+      // Native share (mobile browsers)
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Check out this post!',
+          url: shareUrl,
+        })
+      } else {
+        // Fallback → copy link
+        await navigator.clipboard.writeText(shareUrl)
+        toast.success('Link copied to clipboard!')
+      }
+    } catch (err) {
+      console.error('Share failed:', err)
+    }
+  }
 
   return (
     <Card className="overflow-hidden py-0 gap-0">
@@ -87,7 +113,12 @@ export function PostCard({ post, onLike, onComment, isLoading = false }: PostCar
           >
             <MessageCircle className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon" disabled={isLoading}>
+          <Button
+            variant="ghost"
+            size="icon"
+            disabled={isLoading}
+            onClick={() => handleShare(post.id)}
+          >
             <Share2 className="h-5 w-5" />
           </Button>
         </div>

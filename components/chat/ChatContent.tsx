@@ -10,6 +10,8 @@ import { socketService } from '@/lib/services/socket'
 import { apiService } from '@/lib/services/api'
 import { toast } from 'sonner'
 import { useSocketStore } from '@/lib/stores/socketStore'
+import { ChatSkeleton } from '../skeletons'
+import { ChatCardSkeleton } from '../skeletons/ChatSkeleton'
 
 export function ChatContent() {
   const { user } = useAuth()
@@ -110,7 +112,9 @@ export function ChatContent() {
     const conversationId = activeConversationId
   
     console.log("Subscribing to:", conversationId)
-  
+    
+    setShowConversationList(false)
+
     setLoadingMessages(conversationId, true)
 
     updateConversationUnreadCount(conversationId, 0)
@@ -190,6 +194,8 @@ export function ChatContent() {
   // console.log("[v0] Active conversation:", activeConversation)
   // console.log("[v0] Active messages:", activeMessages)
 
+  // if(true) return <ChatSkeleton />
+
   return (
     <div
       className="
@@ -223,7 +229,9 @@ export function ChatContent() {
           </button>
         </div> */}
 
-        {conversations.length === 0 ? (
+        { loadingConversations && conversations.length === 0 && <ChatCardSkeleton /> }
+
+        {!loadingConversations && conversations.length === 0 ? (
           <Card className="p-4 text-center text-muted-foreground text-sm">
             No conversations yet. Search for users to start chatting!
           </Card>
