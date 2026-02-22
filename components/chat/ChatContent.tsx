@@ -203,7 +203,7 @@ export function ChatContent() {
         flex flex-col lg:grid lg:grid-cols-3
         overflow-hidden
         gap-0 md:gap-4
-        p-2 sm:p-4 md:p-6 lg:p-8
+        p-4 md:p-6 lg:p-8
         md:pb-1 lg:pb-2
       "
     >
@@ -216,7 +216,7 @@ export function ChatContent() {
           min-h-0 min-w-0
           overflow-y-auto
           lg:border-r border-border
-          pr-0 md:pr-2
+          pr-0 md:pr-3
         `}
       >
         {/* <div className="flex items-center justify-between pb-2">
