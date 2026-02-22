@@ -52,7 +52,7 @@ export function ChatCardSkeleton() {
     <div className="w-full space-y-4 p-1">
       
       {/* First Card Skeleton */}
-      <div className="flex items-center gap-4 p-4 rounded-2xl border border-border/60 bg-background/70 backdrop-blur-xl shadow-xl animate-pulse">
+      <div className="flex items-center gap-4 p-4 rounded-2xl border border-border/60 bg-card text-card-foreground backdrop-blur-xl shadow-xl animate-pulse">
         
         {/* Avatar */}
         <div className="h-12 w-12 rounded-full bg-muted" />
@@ -65,7 +65,7 @@ export function ChatCardSkeleton() {
       </div>
 
       {/* Second Card Skeleton */}
-      <div className="flex items-center gap-4 p-4 rounded-2xl border border-border/60 bg-background/70 backdrop-blur-xl shadow-xl animate-pulse">
+      <div className="flex items-center gap-4 p-4 rounded-2xl border border-border/60 bg-card text-card-foreground backdrop-blur-xl shadow-xl animate-pulse">
         
         {/* Avatar */}
         <div className="h-12 w-12 rounded-full bg-muted" />
