@@ -31,7 +31,7 @@ export function ProfileHeaderSkeleton() {
       {/* Stats */}
       <div className="flex justify-evenly sm:justify-start gap-8 border-t pt-4">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="space-y-1">
+          <div key={i} className="flex flex-col items-center space-y-1">
             <Skeleton className="h-6 w-8" />
             <Skeleton className="h-3 w-12" />
           </div>
