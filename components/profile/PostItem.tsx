@@ -116,8 +116,9 @@ export function PostItem({
       {/* Overlay */}
       <div
         className="
-          absolute inset-0 bg-black/40
+          absolute inset-0
           opacity-100 md:opacity-0
+          md:bg-black/40
           md:group-hover:opacity-100
           transition-opacity
         "
@@ -128,19 +129,15 @@ export function PostItem({
           className="
             absolute bottom-2 left-2
             flex items-center gap-1
-            text-white bg-black/60
-            px-2 py-1 rounded-full
+            text-white
 
-            md:bg-transparent
-            md:px-0 md:py-0
-            md:rounded-none
             md:flex md:items-center md:justify-center
             md:gap-2
           "
         >
           <Heart
             className={`
-              h-4 w-4
+              h-3 w-3
               sm:h-5 sm:w-5
               md:h-6 md:w-6
               transition-transform
@@ -156,7 +153,7 @@ export function PostItem({
             <AlertDialogTrigger asChild>
               <button
                 onClick={(e) => e.stopPropagation()}
-                className="absolute top-2 right-2 bg-black/60 hover:bg-black p-1.5 rounded-full"
+                className="absolute top-2 right-2 bg-black/40 hover:bg-black p-1.5 rounded-full"
               >
                 <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 text-red-500" />
               </button>
