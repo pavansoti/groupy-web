@@ -49,7 +49,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export function ChatCardSkeleton() {
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-4 p-1">
       
       {/* First Card Skeleton */}
       <div className="flex items-center gap-4 p-4 rounded-2xl border border-border/60 bg-background/70 backdrop-blur-xl shadow-xl animate-pulse">

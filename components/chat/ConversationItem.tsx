@@ -26,7 +26,7 @@ export function ConversationItem({ conversation, isActive = false, onSelect }: C
     <button
       onClick={onSelect}
       className={cn(
-        'w-full p-4 text-left rounded-lg transition-colors flex items-center justify-between gap-2 mb-3',
+        'w-full p-4 text-left rounded-lg transition-colors flex items-center justify-between gap-2 mb-4 md:mb-3',
         isActive ? 'bg-primary/10 border border-primary' : 'bg-primary/5 hover:bg-muted'
       )}
     >
