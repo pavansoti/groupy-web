@@ -35,6 +35,7 @@ export function ChatContent() {
   } = useChatStore()
   
   // const [connected, setConnected] = useState(false)
+  const [showConversationList, setShowConversationList] = useState(true)
   const [mounted, setMounted] = useState(false)
   const isConnected = useSocketStore((state) => state.isConnected)
  
@@ -103,7 +104,6 @@ export function ChatContent() {
   
   }, [isConnected])
   
-  const [showConversationList, setShowConversationList] = useState(true)
   // const subscriptionsRef = useRef<Map<string, any>>(new Map())
 
   useEffect(() => {
@@ -113,7 +113,7 @@ export function ChatContent() {
   
     console.log("Subscribing to:", conversationId)
     
-    setShowConversationList(false)
+    // setShowConversationList(false)
 
     setLoadingMessages(conversationId, true)
 
