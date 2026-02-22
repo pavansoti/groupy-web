@@ -10,6 +10,7 @@ import { getImageUrl } from '@/lib/utils'
 import { format } from 'date-fns'
 import { decryptId } from '@/lib/services/cryptoService'
 import { PostCardSkeleton } from '@/components/skeletons'
+import { useAuth } from '@/lib/hooks/useAuth'
 
 interface Post {
   id: string
@@ -34,6 +35,7 @@ export default function PostDetailPage() {
   const [post, setPost] = useState<Post | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isLikeLoading, setIsLikeLoading] = useState(false)
+  const { user } = useAuth()
 
   /* ---------------- FETCH POST ---------------- */
 
@@ -67,6 +69,11 @@ export default function PostDetailPage() {
 
   const handleLike = async () => {
     if (!post) return
+
+    if(!user) {
+      router.push('/auth/signin')
+      return
+    }
 
     const previousLiked = post.likedByCurrentUser
 
