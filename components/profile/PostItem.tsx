@@ -19,9 +19,10 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog"
 import { encryptId } from "@/lib/services/cryptoService"
+import { TabId } from "./ProfileTabs"
 
 interface PostItemProps {
-  activeTab: string
+  activeTab: TabId
   post: Post
   isCurrentUserProfile: boolean
   onDelete: (postId: string | number) => void
@@ -148,7 +149,7 @@ export function PostItem({
         </button>
 
         {/* DELETE */}
-        {isCurrentUserProfile && (
+        {isCurrentUserProfile && activeTab === 'posts'&& (
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <button
