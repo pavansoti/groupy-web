@@ -15,7 +15,7 @@ interface ProfileTabsProps {
   onPostDeleted: () => void
 }
 
-type TabId = 'posts' | 'liked' | 'saved'
+export type TabId = 'posts' | 'liked' | 'saved'
 
 interface Tab {
   id: TabId
@@ -264,7 +264,7 @@ function PostsGrid({
   observerRef,
   onPostDeleted
 }: {
-  activeTab: string
+  activeTab: TabId
   posts: Post[]
   isCurrentUserProfile: boolean
   setPosts: React.Dispatch<React.SetStateAction<Post[]>>
