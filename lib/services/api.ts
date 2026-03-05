@@ -126,6 +126,10 @@ class ApiService {
     })
   }
 
+  async deleteProfileImage(userId: string | number) {
+    return this.api.delete(`/api/users/${userId}/profile-pic`)
+  }
+
   async searchUsers(query: string) {
     return this.api.get('/api/users/search', { params: { q: query } })
   }
