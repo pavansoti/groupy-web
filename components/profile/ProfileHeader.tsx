@@ -280,7 +280,7 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = f
               </>
             ) : (
               <div className="flex items-start gap-2">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground whitespace-pre-line">
                   {user.bio || 'No bio yet.'}
                 </p>
 
