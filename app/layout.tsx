@@ -19,19 +19,19 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: '/icon-light-32x32.png',
+        url: '/assets/groupy/groupy-black-logo.png',
         media: '(prefers-color-scheme: light)',
       },
       {
-        url: '/icon-dark-32x32.png',
+        url: '/assets/groupy/groupy-white-logo.png',
         media: '(prefers-color-scheme: dark)',
       },
       {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
+        url: '/assets/groupy/groupy-logo-transparent.png',
+        type: 'image/png',
       },
     ],
-    apple: '/apple-icon.png',
+    apple: '/assets/groupy/groupy-white-image.png',
   },
 }
 

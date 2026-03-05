@@ -32,7 +32,7 @@ function NavbarContent() {
       <nav className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/feed" className="flex items-center gap-2 font-bold text-xl">
-            <div className="h-8 w-8 rounded-full bg-primary"></div>
+            <img src="/assets/groupy/groupy-logo-transparent.png" alt="GroupyChat" width={32} height={32} />
             <span className="hidden sm:inline">GroupyChat</span>
           </Link>
           <div className="h-10 w-10 bg-muted rounded-full"></div>
@@ -45,7 +45,7 @@ function NavbarContent() {
     <nav className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/feed" className="flex items-center gap-2 font-bold text-xl">
-          <div className="h-8 w-8 rounded-full bg-primary"></div>
+          <img src="/assets/groupy/groupy-logo-transparent.png" alt="GroupyChat" width={32} height={32} />
           <span className="hidden sm:inline">GroupyChat</span>
         </Link>
 
