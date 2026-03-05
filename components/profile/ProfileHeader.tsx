@@ -3,6 +3,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog'
+import {
   Settings,
   MessageCircle,
   UserPlus,
@@ -34,6 +45,7 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = f
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [isUploading, setIsUploading] = useState(false)
+  const [isRemovingProfilePic, setIsRemovingProfilePic] = useState(false)
   const [isFollowing, setIsFollowing] = useState(false)
   const [isFollowLoading, setIsFollowLoading] = useState(false)
 
@@ -43,6 +55,7 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = f
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null)
+  const isProfilePicBusy = isUploading || isRemovingProfilePic
 
   const { setUser: setAuthUser } = useAuthStore()
   const {
@@ -89,12 +102,36 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = f
         const updatedUser = res.data.data
         setAuthUser(updatedUser)
         setProfilePicUrl(getImageUrl(updatedUser.imageUrl))
+        // onUserUpdate(updatedUser)
+        toast.success('Profile picture updated')
       }
     } catch (err) {
       toast.error('Failed to update profile picture', err?.response?.data?.message)
       console.error('Profile pic upload failed')
     } finally {
       setIsUploading(false)
+    }
+  }
+
+  const handleProfilePicRemove = async () => {
+    if (!profilePicUrl) return
+
+    try {
+      setIsRemovingProfilePic(true)
+      const res = await apiService.deleteProfileImage(user.id)
+
+      if (res.data?.success) {
+        const updatedUser = res.data.data
+        setAuthUser(updatedUser)
+        setProfilePicUrl(getImageUrl(updatedUser.imageUrl))
+        // onUserUpdate(updatedUser)
+        toast.success('Profile picture removed')
+      }
+    } catch (err) {
+      console.error('Profile pic remove failed', err)
+      toast.error('Failed to remove profile picture', err?.response?.data?.message)
+    } finally {
+      setIsRemovingProfilePic(false)
     }
   }
 
@@ -204,11 +241,48 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = f
         {/* Avatar */}
         <div className="relative">
           {profilePicUrl ? (
-            <img
-              src={profilePicUrl}
-              alt={user.username}
-              className="h-32 w-32 rounded-full object-cover border"
-            />
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button
+                  type="button"
+                  className="focus:outline-none"
+                  aria-label="View profile picture"
+                >
+                  <img
+                    src={profilePicUrl}
+                    alt={user.username}
+                    className="h-32 w-32 rounded-full object-cover border"
+                  />
+                </button>
+              </AlertDialogTrigger>
+
+              <AlertDialogContent size="default" className="max-w-lg sm:max-w-xl">
+                <AlertDialogHeader className="relative">
+                  <div className="pr-8">
+                    <AlertDialogTitle>{user.username}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Profile picture preview
+                    </AlertDialogDescription>
+                  </div>
+
+                  <AlertDialogCancel
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-2 top-2 rounded-full"
+                  >
+                    <X className="h-4 w-4" />
+                  </AlertDialogCancel>
+                </AlertDialogHeader>
+
+                <div className="flex justify-center">
+                  <img
+                    src={profilePicUrl}
+                    alt={user.username}
+                    className="max-h-[70vh] w-auto rounded-lg object-contain"
+                  />
+                </div>
+              </AlertDialogContent>
+            </AlertDialog>
           ) : (
             <div className="h-32 w-32 rounded-full bg-primary/10 flex items-center justify-center text-4xl font-bold text-primary">
               {user.username.charAt(0).toUpperCase()}
@@ -220,10 +294,48 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = f
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="absolute bottom-2 right-2 bg-background border rounded-full p-2 hover:bg-muted"
-                disabled={isUploading}
+                disabled={isProfilePicBusy}
+                aria-label="Change profile picture"
               >
                 <Camera className="h-4 w-4" />
               </button>
+
+              {profilePicUrl && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute bottom-2 left-2 bg-background/80 border rounded-full p-1 hover:bg-destructive/10 text-destructive"
+                      disabled={isProfilePicBusy}
+                      aria-label="Remove profile picture"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </AlertDialogTrigger>
+
+                  <AlertDialogContent
+                    className="max-w-sm"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Remove profile picture?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will delete your current profile photo and revert to your initial-based avatar. You can upload a new photo at any time.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-red-500 hover:bg-red-600"
+                        onClick={handleProfilePicRemove}
+                      >
+                        Remove
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
 
               <input
                 ref={fileInputRef}
@@ -280,7 +392,7 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = f
               </>
             ) : (
               <div className="flex items-start gap-2">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground whitespace-pre-line">
                   {user.bio || 'No bio yet.'}
                 </p>
 
