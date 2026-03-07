@@ -8,7 +8,7 @@ import { toast } from 'sonner'
 import { apiService } from '@/lib/services/api'
 import { getImageUrl } from '@/lib/utils'
 import { format } from 'date-fns'
-import { decryptId } from '@/lib/services/cryptoService'
+import { decryptId, encryptId } from '@/lib/services/cryptoService'
 import { PostCardSkeleton } from '@/components/skeletons'
 import { useAuth } from '@/lib/hooks/useAuth'
 
@@ -115,7 +115,11 @@ export default function PostDetailPage() {
   const handleShare = async () => {
     if (!post) return
 
-    const shareUrl = `${window.location.origin}/post/${post.id}`
+    const encryptedPostId = encryptId(post.id.toString())
+
+    if (!encryptedPostId) return
+
+    const shareUrl = `${window.location.origin}/post/${encodeURIComponent(encryptedPostId)}`
 
     try {
       if (navigator.share) {
