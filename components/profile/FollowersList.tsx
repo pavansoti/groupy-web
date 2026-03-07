@@ -9,12 +9,13 @@ import { User } from '@/lib/stores/authStore'
 
 interface FollowersListProps {
   user: User,
+  type: string,
   followers: SearchResult[]
   isLoading?: boolean
   onFollowChange?: (userId: string, isFollowing: boolean) => void
 }
 
-export function FollowersList({ user, followers, isLoading = false, onFollowChange }: FollowersListProps) {
+export function FollowersList({ user, type, followers, isLoading = false, onFollowChange }: FollowersListProps) {
   if (isLoading) {
     return <FollowersListSkeleton />
   }
@@ -24,7 +25,7 @@ export function FollowersList({ user, followers, isLoading = false, onFollowChan
       <div className="min-h-screen w-full">
         <div className="max-w-4xl mx-auto p-4 sm:p-6">
           <Card className="p-8 text-center">
-          <p className="text-muted-foreground">No followers yet</p>
+          <p className="text-muted-foreground">No {type} yet</p>
           </Card>
         </div>
       </div>

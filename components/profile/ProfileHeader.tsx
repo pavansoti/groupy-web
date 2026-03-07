@@ -456,7 +456,7 @@ export function ProfileHeader({ user, isCurrentUser, onUserUpdate, isLoading = f
         <Stat label="Posts" value={user.postCount || 0} />
         {/* <Stat label="Followers" value={user.followerCount || 0} />
         <Stat label="Following" value={user.followingCount || 0} /> */}
-        <Link href={'/follow/following/' + user.id}>  
+        <Link href={'/follow/followings/' + user.id}>  
           <Stat label="Following" value={user.followingCount || 0} />
         </Link>
         <Link href={'/follow/followers/' + user.id}>

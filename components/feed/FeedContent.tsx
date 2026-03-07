@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useCallback, useState, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { useFeedStore } from '@/lib/stores/feedStore'
 import { PostCard } from './PostCard'
 import { CreatePostForm } from './CreatePostForm'
@@ -11,6 +12,7 @@ import { toast } from 'sonner'
 import { PostCardSkeleton } from '@/components/skeletons'
 import { LIMIT } from '@/lib/constants'
 import { Heart } from 'lucide-react'
+import { encryptId } from '@/lib/services/cryptoService'
 
 export function FeedContent({ feedsType = "all" }) {
   const {
@@ -27,7 +29,7 @@ export function FeedContent({ feedsType = "all" }) {
     resetFeed,
     setHasMore
   } = useFeedStore()
-
+  const router = useRouter()
   const pageRef = useRef(0)
   const [isCreating, setIsCreating] = useState(false)
   const observerRef = useRef<HTMLDivElement | null>(null)
@@ -166,8 +168,12 @@ export function FeedContent({ feedsType = "all" }) {
   )
 
   const handleComment = useCallback((postId: number) => {
-    console.log('Comment on post:', postId)
-  }, [])
+    const encryptedPostId = encryptId(postId.toString())
+
+    if (!encryptedPostId) return
+
+    router.push(`/post/${encodeURIComponent(encryptedPostId)}#comments`)
+  }, [router])
 
   return (
     // { feedsType === "all" ? 'space-y-6 max-w-2xl mx-auto p-4 sm:p-6 lg:p-8' : ''

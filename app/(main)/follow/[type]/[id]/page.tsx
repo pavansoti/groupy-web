@@ -36,7 +36,7 @@ export default function Follows() {
 
         if (type === "followers") {
           response = await apiService.getFollowers(id, offSet, LIMIT);
-        } else if (type === "following") {
+        } else if (type === "followings") {
           response = await apiService.getFollowing(id, offSet, LIMIT);
         } else {
           toast.error("Invalid follow type");
@@ -145,6 +145,7 @@ export default function Follows() {
   return (
     <FollowersList
       user={user}
+      type={type}
       followers={users}
       isLoading={isLoading}
       onFollowChange={handleFollowChange}

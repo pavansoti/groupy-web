@@ -206,7 +206,7 @@ class ApiService {
 
   //open api
   async getPostById(postId: string) {
-    return this.api.get(`/api/auth/${postId}`)
+    return this.api.get(`/api/open/post/${postId}`)
   }
 
   // Like endpoints
@@ -219,12 +219,24 @@ class ApiService {
   }
 
   // Comment endpoints
-  async createComment(postId: string, content: string) {
-    return this.api.post(`/posts/${postId}/comments`, { content })
+  async getComments(postId: string, page: number = 0,  limit: number = LIMIT) {
+    return this.api.get(`/api/open/comments/post/${postId}`, { params: { limit, page } })
+  }
+
+  async createComment(postId: string, comment: string) {
+    return this.api.post(`/api/comments/${postId}`, null, {
+      params: { comment }
+    })
+  }
+
+  async updateComment(commentId: string, comment: string) {
+    return this.api.put(`/api/comments/${commentId}`, null, {
+      params: { comment }
+    })
   }
 
   async deleteComment(commentId: string) {
-    return this.api.delete(`/comments/${commentId}`)
+    return this.api.delete(`/api/comments/${commentId}`)
   }
 
   // Chat endpoints

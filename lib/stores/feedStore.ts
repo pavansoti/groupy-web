@@ -1,12 +1,14 @@
 import { create } from 'zustand'
 import { LIMIT } from '@/lib/constants'
 
+/** Matches backend CommentDto */
 export interface Comment {
-  id: string
-  authorId: string
-  authorUsername: string
-  authorProfilePicture?: string
-  content: string
+  id: number | string
+  postId?: number
+  userId: number | string
+  username: string
+  imageUrl?: string | null
+  message: string
   createdAt: string
 }
 
@@ -22,7 +24,7 @@ export interface Post {
   commentCount: number
   createdAt: string
   likedByCurrentUser: boolean
-  // comments: Comment[]
+  comments?: Comment[]
 }
 
 interface FeedState {
@@ -37,8 +39,8 @@ interface FeedState {
   removePost: (postId: number) => void
   // updatePost: (postId: number, post: Partial<Post>) => void
   toggleLike: (postId: number) => void
-  // addComment: (postId: number, comment: Comment) => void
-  // removeComment: (postId: number, commentId: number) => void
+  addComment: (postId: number, comment: Comment) => void
+  removeComment: (postId: number, commentId: string) => void
   setIsLoading: (loading: boolean) => void
   setHasMore: (hasMore: boolean) => void
   incrementOffset: () => void
@@ -94,31 +96,31 @@ export const useFeedStore = create<FeedState>((set) => ({
       ),
     })),
 
-  // addComment: (postId, comment) =>
-  //   set((state) => ({
-  //     posts: state.posts.map((post) =>
-  //       post.id === postId
-  //         ? {
-  //             ...post,
-  //             // comments: [...post.comments, comment],
-  //             commentsCount: post.commentCount + 1,
-  //           }
-  //         : post
-  //     ),
-  //   })),
+  addComment: (postId, comment) =>
+    set((state) => ({
+      posts: state.posts.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              comments: [...(post.comments ?? []), comment],
+              commentCount: post.commentCount + 1,
+            }
+          : post
+      ),
+    })),
 
-  // removeComment: (postId, commentId) =>
-  //   set((state) => ({
-  //     posts: state.posts.map((post) =>
-  //       post.id === postId
-  //         ? {
-  //             ...post,
-  //             // comments: post.comments.filter((c) => c.id !== commentId),
-  //             commentsCount: post.commentCount - 1,
-  //           }
-  //         : post
-  //     ),
-  //   })),
+  removeComment: (postId, commentId) =>
+    set((state) => ({
+      posts: state.posts.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              comments: (post.comments ?? []).filter((c) => String(c.id) !== String(commentId)),
+              commentCount: Math.max(0, post.commentCount - 1),
+            }
+          : post
+      ),
+    })),
 
   setIsLoading: (isLoading) =>
     set({
