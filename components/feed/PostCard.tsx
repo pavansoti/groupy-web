@@ -11,6 +11,7 @@ import { getImageUrl } from '@/lib/utils'
 import { get } from 'http'
 import { toast } from 'sonner'
 import { encryptId } from '@/lib/services/cryptoService'
+import FeedVideo from './FeedVideo'
 
 interface PostCardProps {
   post: Post
@@ -22,7 +23,10 @@ interface PostCardProps {
 export function PostCard({ post, onLike, onComment, isLoading = false }: PostCardProps) {
   const [showComments, setShowComments] = useState(false)
 
-  const hasImage = !!post.imageUrl
+  // const hasImage = !!post.imageUrl
+  const mediaUrl = post.imageUrl
+  const isVideo = mediaUrl?.match(/\.(mp4|webm|ogg|mov)$/i)
+  const hasMedia = !!mediaUrl
 
   const handleShare = async (postId: string | number) => {
     const encryptedPostId = encryptId(postId.toString())
@@ -68,7 +72,7 @@ export function PostCard({ post, onLike, onComment, isLoading = false }: PostCar
       </div>
 
       {/* Post Image */}
-      {hasImage && (
+      {/* {hasImage && (
         <div className="relative w-full h-[340px] bg-muted flex items-center justify-center overflow-hidden">
           <img
             src={getImageUrl(post.imageUrl) || "/placeholder.svg"}
@@ -76,10 +80,25 @@ export function PostCard({ post, onLike, onComment, isLoading = false }: PostCar
             className="h-full w-auto object-contain"
           />
         </div>
+      )} */}
+      {hasMedia && (
+        <div className="relative w-full h-[340px] bg-muted flex items-center justify-center overflow-hidden">
+
+          {isVideo ? (
+            <FeedVideo src={getImageUrl(mediaUrl)} />
+          ) : (
+            <img
+              src={getImageUrl(mediaUrl) || "/placeholder.svg"}
+              alt={post.caption}
+              className="h-full w-auto object-contain"
+            />
+          )}
+
+        </div>
       )}
 
       {/* Caption (no image → show above actions) */}
-      {!hasImage && (
+      {!hasMedia && (
         <div className="px-4 pt-3">
           <p className="text-sm text-foreground">
             <Link
@@ -95,7 +114,7 @@ export function PostCard({ post, onLike, onComment, isLoading = false }: PostCar
 
       {/* Post Actions */}
       <div className="py-4 px-2 space-y-3">
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           <Button
             variant="ghost"
             size="icon"
@@ -105,6 +124,9 @@ export function PostCard({ post, onLike, onComment, isLoading = false }: PostCar
           >
             <Heart className={`h-5 w-5 ${post.likedByCurrentUser ? 'fill-current' : ''}`} />
           </Button>
+
+          <span className="text-sm">{post.likeCount}</span>
+
           <Button
             variant="ghost"
             size="icon"
@@ -113,6 +135,9 @@ export function PostCard({ post, onLike, onComment, isLoading = false }: PostCar
           >
             <MessageCircle className="h-5 w-5" />
           </Button>
+
+          <span className="text-sm">{post.commentCount}</span>
+
           <Button
             variant="ghost"
             size="icon"
@@ -124,12 +149,12 @@ export function PostCard({ post, onLike, onComment, isLoading = false }: PostCar
         </div>
 
         {/* Likes Count */}
-        <div>
+        {/* <div>
           <p className="px-2 text-sm font-semibold text-foreground">{post.likeCount} likes</p>
-        </div>
+        </div> */}
 
         {/* Caption (image → show below actions) */}
-        {hasImage && (
+        {hasMedia && (
           <div>
             <p className="px-2 text-sm text-foreground">
               <Link
@@ -144,11 +169,11 @@ export function PostCard({ post, onLike, onComment, isLoading = false }: PostCar
         )}
 
         {/* Comments Count */}
-        {post.commentCount > 0 && (
-          <Button variant="link" className="p-0 h-auto text-xs text-muted-foreground">
+        {/* {post.commentCount > 0 && (
+          <Button variant="link" onClick={() => setShowComments(!showComments)} className="p-0 h-auto text-xs text-muted-foreground">
             View {post.commentCount} comments
           </Button>
-        )}
+        )} */}
 
         {/* Comments */}
         {/* {showComments && post.comments.length > 0 && (
@@ -158,10 +183,10 @@ export function PostCard({ post, onLike, onComment, isLoading = false }: PostCar
                 return (
                   <div key={comment.id}>
                     <p className="text-xs">
-                      <Link href={`/profile/${comment.authorId}`} className="font-semibold hover:underline">
-                        {comment.authorUsername}
+                      <Link href={`/profile/${comment.userId}`} className="font-semibold hover:underline">
+                        {comment.username}
                       </Link>{' '}
-                      {comment.content}
+                      {comment.message}
                     </p>
                     <p className="text-xs text-muted-foreground">{format(new Date(comment.createdAt), 'MMM d')}</p>
                   </div>

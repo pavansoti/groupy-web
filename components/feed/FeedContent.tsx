@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useCallback, useState, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { useFeedStore } from '@/lib/stores/feedStore'
 import { PostCard } from './PostCard'
 import { CreatePostForm } from './CreatePostForm'
@@ -11,88 +12,129 @@ import { toast } from 'sonner'
 import { PostCardSkeleton } from '@/components/skeletons'
 import { LIMIT } from '@/lib/constants'
 import { Heart } from 'lucide-react'
+import { encryptId } from '@/lib/services/cryptoService'
 
 export function FeedContent({ feedsType = "all" }) {
   const {
     posts,
     isLoading,
     hasMore,
-    // offset,
+    scrollPosition,
     setIsLoading,
-    // incrementOffset,
+    setScrollPosition,
     setPosts,
     addPosts,
     removePost,
     toggleLike,
-    resetFeed,
     setHasMore
   } = useFeedStore()
-
+  const router = useRouter()
   const pageRef = useRef(0)
-  const [isCreating, setIsCreating] = useState(false)
   const observerRef = useRef<HTMLDivElement | null>(null)
-  const fetchingRef = useRef(false) // prevents infinite calls
-  const activeFeedRef = useRef(feedsType)
+  const fetchingRef = useRef(false)
 
-  // Production fetch
-  const fetchPosts = useCallback(
-    async (offSet: number, isLoadMore = false) => {
-      if (fetchingRef.current) return
-      fetchingRef.current = true
+  const [isCreating, setIsCreating] = useState(false)
 
-      const currentFeedType = feedsType
+  const restoreScrollRef = useRef<number | null>(null)
+  const scrollRestoredRef = useRef(false)
 
-      try {
-        setIsLoading(true)
+  // ---------------- FETCH POSTS ----------------
 
-        const response = await apiService.getFeedFollowing(
-          feedsType === 'liked',
-          offSet,
-          LIMIT
-        )
+  const fetchPosts = useCallback(async (page: number, loadMore = false) => {
 
-        // Ignore outdated responses
-        if (activeFeedRef.current !== currentFeedType) {
-          return
-        }
+    if (fetchingRef.current) return
+    fetchingRef.current = true
 
-        if (response.data?.success) {
-          const data = response.data.data
-          setHasMore(data.hasMore)
+    try {
 
-          if (isLoadMore) {
-            addPosts(data.content)
-          } else {
-            setPosts(data.content)
-          }
+      setIsLoading(true)
+
+      const res = await apiService.getFeedFollowing(
+        feedsType === "liked",
+        page,
+        LIMIT
+      )
+
+      if (res.data?.success) {
+
+        const data = res.data.data
+
+        setHasMore(data.hasMore)
+
+        if (loadMore) {
+          addPosts(data.content)
         } else {
-          toast.error('Failed to fetch posts')
+          setPosts(data.content)
         }
-      } catch (error) {
-        console.error('Feed fetch error:', error)
-      } finally {
-        setIsLoading(false)
-        fetchingRef.current = false
-      }
-    },
-    [feedsType, setIsLoading, setPosts, addPosts, setHasMore]
-  )
 
-  useEffect(() => {
-    activeFeedRef.current = feedsType
+      } else {
+        toast.error("Failed to fetch posts")
+      }
+
+    } catch (err) {
+      console.error("Feed error:", err)
+    } finally {
+      setIsLoading(false)
+      fetchingRef.current = false
+    }
+
   }, [feedsType])
 
-  // Initial load
   useEffect(() => {
-    pageRef.current = 0
-    setPosts([])
-    setHasMore(true)
 
-    fetchPosts(0, false)
-    return () => resetFeed()
-  }, [fetchPosts, resetFeed])
+    if (scrollRestoredRef.current) return
+    if (posts.length === 0) return
+    if (scrollPosition === 0) return
 
-  // Production Infinite Scroll
+    const restoreScroll = () => {
+
+      if (document.body.scrollHeight >= scrollPosition) {
+
+        window.scrollTo({
+          top: scrollPosition,
+          behavior: "auto"
+        })
+
+        scrollRestoredRef.current = true
+
+      } else {
+        setTimeout(restoreScroll, 50)
+      }
+
+    }
+
+    restoreScroll()
+
+  }, [posts, scrollPosition])
+
+  // ---------------- INITIAL LOAD ----------------
+
+  useEffect(() => {
+
+    // only fetch if store empty
+    if (posts.length === 0) {
+      fetchPosts(pageRef.current, false)
+    }
+
+  }, [])
+
+  // ---------------- RESTORE SCROLL ----------------
+
+  useEffect(() => {
+
+    if (restoreScrollRef.current !== null && posts.length > 0) {
+
+      requestAnimationFrame(() => {
+        window.scrollTo(0, restoreScrollRef.current!)
+      })
+
+      restoreScrollRef.current = null
+    }
+
+  }, [posts])
+
+  // ---------------- INFINITE SCROLL ----------------
+
   useEffect(() => {
     if (!hasMore) return
   
@@ -113,21 +155,24 @@ export function FeedContent({ feedsType = "all" }) {
       },
       {
         root: null,
-        rootMargin: '50px',
-        threshold: 0,
+        rootMargin: "100px",
+        threshold: 0
       }
     )
-  
-    const current = observerRef.current
-    if (current) observer.observe(current)
-  
+
+    const el = observerRef.current
+
+    if (el) observer.observe(el)
+
     return () => {
-      if (current) observer.unobserve(current)
+      if (el) observer.unobserve(el)
       observer.disconnect()
     }
-  }, [hasMore, isLoading, fetchPosts])
 
-  // Create Post
+  }, [hasMore, isLoading])
+
+  // ---------------- CREATE POST ----------------
+
   const handleCreatePost = useCallback(async (formData: FormData) => {
     try {
       setIsCreating(true)
@@ -135,46 +180,70 @@ export function FeedContent({ feedsType = "all" }) {
       const res = await apiService.createPost(formData)
 
       if (!res.data.success) {
-        toast.error('Failed to create post')
+        toast.error("Failed to create post")
         return false
       }
 
-      toast.success('Post created successfully')
-      resetFeed()
+      toast.success("Post created")
+
       fetchPosts(0, false)
 
       return true
-    } catch (err) {
-      toast.error('Something went wrong', err?.response?.data?.message)
+
+    } catch {
+      toast.error("Something went wrong")
       return false
     } finally {
       setIsCreating(false)
     }
-  }, [fetchPosts, resetFeed])
 
-  const handleLike = useCallback(
-    async (postId: number, liked: boolean) => {
-      const action = liked ? 'unlikePost' : 'likePost'
-      await apiService[action](postId)
-      if(feedsType === 'liked') {
-        removePost(postId)
-      } else {
-        toggleLike(postId)
-      }
-    },
-    [toggleLike]
-  )
-
-  const handleComment = useCallback((postId: number) => {
-    console.log('Comment on post:', postId)
   }, [])
 
+  // ---------------- LIKE ----------------
+
+  const handleLike = useCallback(async (postId: number, liked: boolean) => {
+
+    const action = liked ? "unlikePost" : "likePost"
+
+    await apiService[action](postId)
+
+    if (feedsType === "liked") {
+      removePost(postId)
+    } else {
+      toggleLike(postId)
+    }
+
+  }, [feedsType])
+
+  // ---------------- COMMENT NAVIGATION ----------------
+
+  const handleComment = useCallback((postId: number) => {
+    const encryptedPostId = encryptId(postId.toString())
+
+    if (!encryptedPostId) return
+
+    const state = {
+      scrollY: window.scrollY,
+      page: pageRef.current
+    }
+
+    setScrollPosition(window.scrollY)
+
+    router.push(`/post/${encodeURIComponent(encryptedPostId)}#comments`)
+
+  }, [])
+
+  // ---------------- UI ----------------
+
   return (
-    // { feedsType === "all" ? 'space-y-6 max-w-2xl mx-auto p-4 sm:p-6 lg:p-8' : ''
-    <div className={feedsType === "all" 
-      ? "space-y-6 max-w-2xl mx-auto p-4 sm:p-6 lg:p-8" 
-      : "space-y-6 max-w-2xl mx-auto"}>
-      {feedsType === 'all' && (
+
+    <div className={
+      feedsType === "all"
+        ? "space-y-6 max-w-2xl mx-auto p-4 sm:p-6 lg:p-8"
+        : "space-y-6 max-w-2xl mx-auto"
+    }>
+
+      {feedsType === "all" && (
         <CreatePostForm
           onSubmit={handleCreatePost}
           isLoading={isCreating}
@@ -192,9 +261,11 @@ export function FeedContent({ feedsType = "all" }) {
           {feedsType === "liked" ? (
             <>
               <Heart className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <p className="text-muted-foreground mb-4">You haven't liked any posts yet</p>
+              <p className="text-muted-foreground mb-4">
+                You haven't liked any posts yet
+              </p>
               <p className="text-sm text-muted-foreground">
-                Start liking posts from the feed to see them here
+                Start liking posts from the feed
               </p>
             </>
           ) : (
@@ -210,7 +281,8 @@ export function FeedContent({ feedsType = "all" }) {
         </Card>
       ) : (
         <>
-          {posts.map((post) => (
+          {posts.map(post => (
+
             <PostCard
               key={post.id}
               post={post}
@@ -221,9 +293,7 @@ export function FeedContent({ feedsType = "all" }) {
           ))}
 
           {hasMore && (
-            <div
-              ref={observerRef}
-            >
+            <div ref={observerRef}>
               {isLoading && <PostCardSkeleton />}
             </div>
           )}

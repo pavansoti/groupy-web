@@ -1,4 +1,5 @@
 // const OFF_SET = 1
 const LIMIT = 30
+const COMMENTS_PAGE_SIZE = 15
 
-export { LIMIT }
+export { LIMIT, COMMENTS_PAGE_SIZE }

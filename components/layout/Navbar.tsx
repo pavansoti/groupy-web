@@ -15,11 +15,13 @@ import { Moon, Sun, LogOut, User, Lock } from 'lucide-react'
 import Link from 'next/link'
 import { ThemePicker } from '../providers/ThemePicker'
 import { ChangePasswordDialog } from '../auth/ChangePasswordDialog'
+import { useRouter } from 'next/navigation'
 
 function NavbarContent() {
   const { theme, setTheme } = useTheme()
   const { user, logout, mounted } = useAuth()
   const [changePasswordOpen, setChangePasswordOpen] = useState(false)
+  const router = useRouter();
 
   const handleLogout = () => {
     sessionStorage.clear()
@@ -60,6 +62,16 @@ function NavbarContent() {
           >
             {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
           </Button>
+
+          {!user && (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => router.push("/auth/signin")}
+            >
+              Sign in
+            </Button>
+          )}
 
           {user && (
             <DropdownMenu>

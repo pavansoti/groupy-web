@@ -8,7 +8,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
 import { createPostSchema, CreatePostFormData } from '@/lib/schemas/post'
 import { ImageIcon, X } from 'lucide-react'
-import { toast } from 'sonner'
 
 interface CreatePostFormProps {
   onSubmit: (formData: FormData) => Promise<boolean>
@@ -21,6 +20,7 @@ export function CreatePostForm({
 }: CreatePostFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [preview, setPreview] = useState<string | null>(null)
+  const [fileType, setFileType] = useState<'image' | 'video' | null>(null)
   const [file, setFile] = useState<File | null>(null)
 
   const {
@@ -36,6 +36,16 @@ export function CreatePostForm({
     const selectedFile = e.target.files?.[0]
     if (!selectedFile) return
 
+    const type = selectedFile.type
+
+    if (type.startsWith('image')) {
+      setFileType('image')
+    } else if (type.startsWith('video')) {
+      setFileType('video')
+    } else {
+      return
+    }
+
     setFile(selectedFile)
 
     const reader = new FileReader()
@@ -48,6 +58,8 @@ export function CreatePostForm({
   const clearPreview = () => {
     setPreview(null)
     setFile(null)
+    setFileType(null)
+
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -90,11 +102,23 @@ export function CreatePostForm({
 
         {preview && (
           <div className="relative w-full h-[340px] bg-muted rounded-lg flex items-center justify-center overflow-hidden">
-            <img
-              src={preview}
-              alt="Preview"
-              className="h-full w-auto object-contain"
-            />
+
+            {fileType === 'image' && (
+              <img
+                src={preview}
+                alt="Preview"
+                className="h-full w-auto object-contain"
+              />
+            )}
+
+            {fileType === 'video' && (
+              <video
+                src={preview}
+                controls
+                className="h-full w-auto object-contain"
+              />
+            )}
+
             <Button
               type="button"
               size="icon"
@@ -109,7 +133,7 @@ export function CreatePostForm({
 
         <input
           type="file"
-          accept="image/*"
+          accept="image/*,video/*"
           ref={fileInputRef}
           onChange={handleFileChange}
           className="hidden"
