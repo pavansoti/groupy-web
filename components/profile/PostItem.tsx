@@ -39,7 +39,9 @@ export function PostItem({
   onUnsaved,
 }: PostItemProps) {
   const router = useRouter()
-  const imageSrc = getImageUrl(post.imageUrl)
+  // const imageSrc = getImageUrl(post.imageUrl)
+  const mediaUrl = getImageUrl(post.imageUrl)
+  const isVideo = post.imageUrl?.match(/\.(mp4|webm|ogg|mov)$/i)
 
   const [liked, setLiked] = useState(post.likedByCurrentUser ?? false)
   const [likesCount, setLikesCount] = useState(post.likeCount ?? 0)
@@ -107,12 +109,24 @@ export function PostItem({
       onClick={handleNavigate}
       className="relative aspect-square overflow-hidden bg-muted group cursor-pointer"
     >
-      <img
-        src={imageSrc}
-        alt={post.caption}
-        loading="lazy"
-        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-      />
+      {isVideo ? (
+        <video
+          src={mediaUrl}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+      ) : (
+        <img
+          src={mediaUrl}
+          alt={post.caption}
+          loading="lazy"
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+      )}
 
       {/* Overlay */}
       <div

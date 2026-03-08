@@ -32,6 +32,7 @@ interface FeedState {
   isLoading: boolean
   hasMore: boolean
   offset: number
+  scrollPosition: number
 
   // Actions
   setPosts: (posts: Post[]) => void
@@ -44,6 +45,8 @@ interface FeedState {
   setIsLoading: (loading: boolean) => void
   setHasMore: (hasMore: boolean) => void
   incrementOffset: () => void
+
+  setScrollPosition: (pos: number) => void
   resetFeed: () => void
 }
 
@@ -52,6 +55,7 @@ export const useFeedStore = create<FeedState>((set) => ({
   isLoading: false,
   hasMore: true,
   offset: 0,
+  scrollPosition: 0,
 
   setPosts: (posts) =>
     set({
@@ -136,6 +140,11 @@ export const useFeedStore = create<FeedState>((set) => ({
     set((state) => ({
       offset: state.offset + LIMIT,
     })),
+
+  setScrollPosition: (pos) =>
+    set({
+      scrollPosition: pos,
+    }),
 
   resetFeed: () =>
     set({

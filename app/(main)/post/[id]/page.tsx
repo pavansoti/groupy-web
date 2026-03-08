@@ -346,13 +346,28 @@ export default function PostDetailPage() {
       {/* Content */}
       <div className="space-y-4">
         <p className="text-base">{post.caption}</p>
-        {post.imageUrl && (
-          <img
-            src={getImageUrl(post.imageUrl)}
-            alt="Post"
-            className="rounded-xl w-full max-h-[400px] object-contain"
-          />
-        )}
+
+        {post.imageUrl && (() => {
+          const mediaUrl = getImageUrl(post.imageUrl)
+          const isVideo = post.imageUrl.match(/\.(mp4|webm|ogg|mov)$/i)
+
+          return isVideo ? (
+            <video
+              src={mediaUrl}
+              controls
+              loop
+              playsInline
+              preload="metadata"
+              className="rounded-xl w-full max-h-[400px]"
+            />
+          ) : (
+            <img
+              src={mediaUrl}
+              alt="Post"
+              className="rounded-xl w-full max-h-[400px] object-contain"
+            />
+          )
+        })()}
       </div>
 
       {/* Actions */}
